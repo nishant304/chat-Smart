@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <EditText
+    <ImageView
+        android:id="@+id/smiley"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:src="@drawable/smiley"/>
+
+    <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
         android:id="@+id/edMessageBox"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="5"
+        android:layout_weight="6"
+        android:background="@android:color/white"
+        style="@style/Base.V7.Widget.AppCompat.EditText"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/black"
+        android:drawableRight="@drawable/zzz_camera"
         android:paddingLeft="10dp"
         android:hint="send message"
+        emojicon:emojiconSize="28sp"
         android:inputType="textPersonName" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/btSendMessage"
         android:layout_width="0dp"
+        android:foregroundGravity="center"
         android:layout_height="match_parent"
         android:layout_weight="1"
         app:civ_fill_color="@android:color/white"
-        android:src="@drawable/zzz_arrow_right_bold"
+        android:src="@drawable/ic_action_send_now"
         />
 </LinearLayout>
 

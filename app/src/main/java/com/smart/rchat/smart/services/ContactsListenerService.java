@@ -168,10 +168,11 @@ public class ContactsListenerService extends Service {
                         HashMap<String, Object> hm = (HashMap<String, Object>) map.get(s);
                         ContentValues cv = new ContentValues();
                         cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
+                        cv.put(RChatContract.MESSAGE_TABLE.type, Integer.valueOf(hm.get("type").toString()));
                         cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
                         cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
                         cv.put(RChatContract.MESSAGE_TABLE.to, user.getUid());
-                        //cv.put(RChatContract.MESSAGE_TABLE.message_id, s);
+                        //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
                         getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
                         try {
                             if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {

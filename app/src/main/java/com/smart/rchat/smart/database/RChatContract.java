@@ -29,7 +29,7 @@ public final class RChatContract {
         public  static  final  String TABLE_NAME=  "Message";
         public  static  final Uri  CONTENT_URI = Uri.parse(RChatContract.CONTENT_URI.toString()+"/"+TABLE_NAME);
         public  static  final  String message=  "message";
-        public  static  final  int type=  "type";
+        public  static  final  String type=  "type";
         public  static  final  String from=  "from_user_id";
         public  static  final  String to=  "to_user_id";
         public  static  final  String time =  "time";

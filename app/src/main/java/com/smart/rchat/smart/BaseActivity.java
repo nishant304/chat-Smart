@@ -62,7 +62,7 @@ public class BaseActivity extends AppCompatActivity  {
         progressDialog = ProgressDialog.show(this,"","Please wait");
     }
 
-    protected void hideDialog() {
+    protected void hideDialog() {//ixme
         if(progressDialog!=null && progressDialog.isShowing()){
             progressDialog.cancel();
         }

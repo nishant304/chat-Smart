@@ -121,7 +121,6 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
                                        IBinder service) {
             try {
                 IContactListener listener = IContactListener.Stub.asInterface(service);
-
                 listener.registerActivityCallBack(cl);
             }catch(RemoteException ex){
 
@@ -147,4 +146,9 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
+    }
 }

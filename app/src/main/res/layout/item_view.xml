@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_margin="10dp"
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:civ_fill_color="@color/wallet_holo_blue_light"
+        android:src="@drawable/profile"
+        />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layout_below="@+id/tvName"
+        android:layout_toRightOf="@id/profile_image"
+        android:id="@+id/tvNumber"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:text="Invite"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_margin="20dp"
+        android:background="@color/colorAccent"
+        android:layout_alignParentRight="true"
+        android:id="@+id/tvInvite"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@id/profile_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvName" />
+
+</RelativeLayout>

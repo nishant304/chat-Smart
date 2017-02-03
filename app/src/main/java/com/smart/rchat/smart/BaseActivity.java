@@ -1,0 +1,70 @@
+package com.smart.rchat.smart;
+
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.database.CursorWindow;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Contacts;
+import android.provider.ContactsContract;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.services.UpdateContactsService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+
+/**
+ * Created by nishant on 1/24/2017.
+ */
+public class BaseActivity extends AppCompatActivity  {
+
+
+    private ProgressDialog progressDialog;
+    private ContentObserver contentObserver;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    protected void addFragment(Fragment fragment, int id) {
+        getFragmentManager().beginTransaction().add(id, fragment).commit();
+    }
+
+    protected void makeToast(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_LONG).show();
+    }
+
+
+    protected void showDialog() {
+        progressDialog = ProgressDialog.show(this,"","Please wait");
+    }
+
+    protected void hideDialog() {
+        if(progressDialog!=null && progressDialog.isShowing()){
+            progressDialog.cancel();
+        }
+    }
+}

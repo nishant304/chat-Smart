@@ -43,19 +43,21 @@ public class ContactsListenerService extends Service {
     private IActivityCallBack iActivityCallBack;
     private HashMap<String, String> idToName = new HashMap<>();
 
+    private boolean stopTask = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
         getApplicationContext().getContentResolver().
                 registerContentObserver(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, false, new ContactsObserver());
-        FirebaseApp.initializeApp(this);
-        listenForMessages();
+        stopTask = false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        FirebaseApp.initializeApp(this);
         updateDb();
+        listenForMessages();
         return START_STICKY;
     }
 
@@ -138,15 +140,18 @@ public class ContactsListenerService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
 
-        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
-        restartServiceIntent.setPackage(getPackageName());
+        if(!stopTask) {
 
-        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
-        alarmService.set(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + 1000,
-                restartServicePendingIntent);
+            Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+            restartServiceIntent.setPackage(getPackageName());
+
+            PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+            AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
+            alarmService.set(
+                    AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime() + 1000,
+                    restartServicePendingIntent);
+        }
 
         super.onTaskRemoved(rootIntent);
     }
@@ -220,6 +225,15 @@ public class ContactsListenerService extends Service {
         @Override
         public void registerActivityCallBack(IActivityCallBack callBack) throws RemoteException {
             iActivityCallBack = callBack;
+        }
+
+        @Override
+        public void stopService() throws RemoteException {
+
+            FirebaseAuth.getInstance().signOut();
+            stopTask = true;
+            stopSelf();
+            stopService();
         }
     };
 

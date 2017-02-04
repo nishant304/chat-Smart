@@ -41,13 +41,15 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     private ContactsAdapter contactsAdapter;
 
+    IContactListener listener;
+
     private String id = "";
+    boolean bound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_screen);
-        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         startService();
         getLoaderManager().initLoader(0,null,this);
@@ -76,9 +78,26 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_signout){
+            //Fixme
+            FirebaseDatabase.getInstance().getReference().child("Users").
+                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                    child("status").setValue("last seen at " + AppUtil.getCurrentTime());
+            if(bound) {
+                unbindService(mConnection);
+                bound = false;
+            }
+            try {
+                if (listener != null) {
+                    listener.stopService();
+                }
+            }catch(Exception e){
+
+            }
+
             FirebaseAuth.getInstance().signOut();
             getContentResolver().delete(RChatContract.USER_TABLE.CONTENT_URI,null,null);
             getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
+
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
             finish();
@@ -112,6 +131,7 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
         intent.putExtra("friend_user_id",id);
         intent.putExtra("name",nameIdPair.name);
         startActivity(intent);
+
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -119,8 +139,9 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
+            bound = true;
             try {
-                IContactListener listener = IContactListener.Stub.asInterface(service);
+                listener = IContactListener.Stub.asInterface(service);
                 listener.registerActivityCallBack(cl);
             }catch(RemoteException ex){
 
@@ -129,7 +150,7 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-
+            bound =false;
         }
     };
 
@@ -149,6 +170,8 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(mConnection);
+        if(bound) {
+            unbindService(mConnection);
+        }
     }
 }

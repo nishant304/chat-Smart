@@ -11,5 +11,6 @@ interface IContactListener {
      */
 
      void registerActivityCallBack(IActivityCallBack callBack);
+     void stopService();
 
 }

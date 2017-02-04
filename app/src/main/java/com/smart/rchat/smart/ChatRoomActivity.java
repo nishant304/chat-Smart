@@ -82,7 +82,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         setContentView(R.layout.fragment_chat_room);
         friendUserId = getIntent().getStringExtra("friend_user_id");
         name = getIntent().getStringExtra("name");
-        ButterKnife.bind(this);
+
         send.setOnClickListener(this);
         View rootView = findViewById(R.id.rootView);
         EmojIconActions emojIcon=new EmojIconActions(this,rootView,edMessageBox,emoji);

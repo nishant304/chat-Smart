@@ -59,7 +59,7 @@
             android:layout_below="@+id/rlLeft"
             android:layout_margin="10dp"
             android:src="@drawable/rchatlogo"
-            android:visibility="gone" />
+             />
 
         <ProgressBar
             android:id="@+id/pbLeft"
@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
     </RelativeLayout>
 

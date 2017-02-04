@@ -74,7 +74,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_screen);
-        ButterKnife.bind(this);
         login.setOnClickListener(this);
         register.setOnClickListener(this);
         populateAutoComplete();

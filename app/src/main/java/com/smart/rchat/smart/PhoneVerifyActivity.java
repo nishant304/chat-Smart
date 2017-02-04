@@ -52,7 +52,6 @@ public class PhoneVerifyActivity extends BaseActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.phone_verify_screen);
-        ButterKnife.bind(this);
         submit.setOnClickListener(this);
     }
 

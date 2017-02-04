@@ -58,6 +58,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/rlLeft"
             android:layout_margin="10dp"
+            android:scaleType="fitXY"
             android:src="@drawable/rchatlogo"
              />
 
@@ -86,6 +87,7 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/rlLeft"
             android:layout_margin="10dp"
+            android:scaleType="fitXY"
             android:src="@drawable/rchatlogo"
              />
 

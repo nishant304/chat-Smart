@@ -31,6 +31,7 @@ import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.util.AppData;
+import com.smart.rchat.smart.util.AppUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -122,11 +123,7 @@ public class ChatRoomAdapter extends CursorAdapter {
                                 }
                                 rightImageView.setImageBitmap(bitmap);
 
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                                final byte[] bytes = baos.toByteArray();
-
-                                storageReference.putBytes(bytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                AppUtil.uploadBitmap(url,bitmap, new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                                         progressBar.setVisibility(View.GONE);
@@ -140,7 +137,6 @@ public class ChatRoomAdapter extends CursorAdapter {
 
                                     }
                                 });
-
                             }
                         }
 

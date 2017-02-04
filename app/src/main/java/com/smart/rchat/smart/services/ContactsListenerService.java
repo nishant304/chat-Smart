@@ -97,10 +97,14 @@ public class ContactsListenerService extends Service {
                 String userID = null;
                 if (dataSnapshot.exists()) {
                     userID = dataSnapshot.getValue().toString();
+                    if (userID != null) {
+                        idToName.put(userID, name);
+                    }
                 }
 
                 if (userID != null) {
                     final String finalUserID = userID;
+
                     FirebaseDatabase.getInstance().getReference().child("/Users").child(userID).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {

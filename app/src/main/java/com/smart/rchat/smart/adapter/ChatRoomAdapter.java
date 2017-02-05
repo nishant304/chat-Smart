@@ -30,8 +30,13 @@ import com.google.firebase.storage.UploadTask;
 import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.interfaces.ResponseListener;
+import com.smart.rchat.smart.network.NetworkClient;
 import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
+import com.smart.rchat.smart.util.RchatError;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -105,47 +110,21 @@ public class ChatRoomAdapter extends CursorAdapter {
                 final ImageView rightImageView = (ImageView) view.findViewById(R.id.ivOutImg);
                 final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.pbRight);
                 final String url = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
+               // Bitmap bitmap = AppData.getInstance().getLruCache().get(url);
 
-                final StorageReference storageReference = FirebaseStorage.getInstance().getReference(url);
-                storageReference.getMetadata().addOnCompleteListener(new OnCompleteListener<StorageMetadata>() {
+                //rightImageView.setImageBitmap(bitmap);
+                NetworkClient.getInstance().uploadBitMap(url, new ResponseListener() {
                     @Override
-                    public void onComplete(@NonNull Task<StorageMetadata> task) {
-                        Exception ex = task.getException();
-                        if (ex instanceof StorageException) {
-                            StorageException st = (StorageException) ex;
-                            if (st.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
-                                Bitmap bitmap = AppData.getInstance()
-                                        .getLruCache().get(url);
+                    public void onSuccess(JSONObject jsonObject) {
+                        Glide.with(context).using(new FirebaseImageLoader())
+                                .load(FirebaseStorage.getInstance().getReference(url))
+                                .into(rightImageView);
+                        progressBar.setVisibility(View.GONE);
+                    }
 
-                                if (bitmap == null) {
-                                    progressBar.setVisibility(View.GONE);
-                                    return;
-                                }
-                                rightImageView.setImageBitmap(bitmap);
-
-                                AppUtil.uploadBitmap(url,bitmap, new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                        progressBar.setVisibility(View.GONE);
-                                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("/Messages");
-                                        HashMap<String, Object> hashMap = new HashMap<>();
-                                        hashMap.put("from", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                        hashMap.put("to", friendUserId);
-                                        hashMap.put("message", url);
-                                        hashMap.put("type", ChatRoomActivity.TYPE_IMAGE);
-                                        ref.push().setValue(hashMap);
-
-                                    }
-                                });
-                            }
-                        }
-
-                        if(ex == null){
-                            Glide.with(context).using(new FirebaseImageLoader())
-                                    .load(FirebaseStorage.getInstance().getReference(url))
-                                    .into(rightImageView);
-                        }
-
+                    @Override
+                    public void onError(Exception error) {
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
             }

@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.network.NetworkClient;
 import com.smart.rchat.smart.services.UpdateContactsService;
 
 import java.util.ArrayList;
@@ -42,9 +43,11 @@ import butterknife.ButterKnife;
  */
 public class BaseActivity extends AppCompatActivity  {
 
-
     private ProgressDialog progressDialog;
+
     private ContentObserver contentObserver;
+
+    private NetworkClient networkClient = NetworkClient.getInstance();
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
@@ -70,4 +73,9 @@ public class BaseActivity extends AppCompatActivity  {
             progressDialog.cancel();
         }
     }
+
+    protected  NetworkClient getNetworkClient(){
+        return networkClient;
+    }
+
 }

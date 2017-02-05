@@ -36,8 +36,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.services.ContactsListenerService;
 import com.smart.rchat.smart.util.AppUtil;
+import com.smart.rchat.smart.util.RchatError;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +97,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void sendHome() {
-        //startService();
         final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/Users");
         ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -198,9 +201,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btRegister) {
-            createAccount(email.getText().toString(), password.getText().toString());
+            authUser(email.getText().toString(), password.getText().toString(),false);
         } else {
-            signIn(email.getText().toString(), password.getText().toString());
+            authUser(email.getText().toString(), password.getText().toString(),true);
         }
     }
 
@@ -218,52 +221,34 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         }
     }
 
-    private void createAccount(String email, String password) {
+    private void authUser(String email, String password,boolean isSignIn) {
         if (!validateForm()) {
             return;
         }
-        showDialog();
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                        if (!task.isSuccessful()) {
-                            String code = "something went wrong";
-                            if (task.getException() instanceof FirebaseAuthException) {
-                                FirebaseAuthException firebaseAuthException = (FirebaseAuthException) task.getException();
-                                code = firebaseAuthException.getErrorCode();
-                            }
-                            hideDialog();
-                            Toast.makeText(LoginActivity.this, code,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
+        if(isSignIn) {
+            getNetworkClient().loginUser(email, password, new UserAuthListener());
+        }else{
+            getNetworkClient().createUser(email, password, new UserAuthListener());
+        }
     }
 
+    private  class UserAuthListener implements ResponseListener{
 
-    private void signIn(String email, String password) {
-        if (!validateForm()) {
-            return;
+        UserAuthListener(){
+            showDialog();
         }
-        showDialog();
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            hideDialog();
-                            String code = "something went wrong";
-                            if (task.getException() instanceof FirebaseAuthException) {
-                                FirebaseAuthException firebaseAuthException = (FirebaseAuthException) task.getException();
-                                code = firebaseAuthException.getErrorCode();
-                            }
-                            makeToast(code);
-                        }
-                    }
-                });
+
+        @Override
+        public void onSuccess(JSONObject jsonObject) {
+            hideDialog();
+            makeToast("login success");
+        }
+
+        @Override
+        public void onError(Exception error) {
+            hideDialog();
+            makeToast(error.getMessage());
+        }
 
     }
 

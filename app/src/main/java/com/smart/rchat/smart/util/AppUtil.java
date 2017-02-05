@@ -1,5 +1,6 @@
 package com.smart.rchat.smart.util;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,14 +8,20 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
+import com.smart.rchat.smart.ChatRoomActivity;
+import com.smart.rchat.smart.database.RChatContract;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
+
 /**
  * Created by nishant on 31.01.17.
  */
@@ -53,6 +60,23 @@ public class AppUtil {
         return null;
     }
 
+    public  static HashMap<String,Object>  getMessageRequest (String friendUserId,String message,int type){
+        HashMap<String,Object> hashMap = new HashMap<>();
+        hashMap.put("from", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        hashMap.put("to",friendUserId);
+        hashMap.put("message",message);
+        hashMap.put("type", type);
+        return  hashMap;
+    }
 
+    public  static ContentValues getCVforMessafRequest (String friendUserId, String message){
+        ContentValues cv = new ContentValues();
+        cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
+        cv.put(RChatContract.MESSAGE_TABLE.message,message);
+        cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
+        cv.put(RChatContract.MESSAGE_TABLE.from,FirebaseAuth.getInstance().getCurrentUser().getUid());
+        cv.put(RChatContract.MESSAGE_TABLE.type,ChatRoomActivity.TYPE_MESSAGE);
+        return  cv;
+    }
 
 }

@@ -22,11 +22,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".HomeActivity" />
-        <activity android:name=".PhoneVerifyActivity" />
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".HomeActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".PhoneVerifyActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ChatRoomActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".HomeActivity"
             android:launchMode="singleInstance"
             />

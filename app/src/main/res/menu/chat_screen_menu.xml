@@ -4,6 +4,7 @@
     <item
         android:id="@+id/action_send_photo"
         android:icon="@drawable/zzz_attachment"
+        android:title="attchment"
         android:showAsAction="always" />
 
 </menu>

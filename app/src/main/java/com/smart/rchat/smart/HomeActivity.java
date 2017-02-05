@@ -65,8 +65,6 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
     protected void onResume() {
         super.onResume();
         id = "";
-        FirebaseDatabase.getInstance().getReference().child("Users").
-                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("status").setValue("Online");
     }
 
     @Override
@@ -79,9 +77,7 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_signout){
             //Fixme
-            FirebaseDatabase.getInstance().getReference().child("Users").
-                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                    child("status").setValue("last seen at " + AppUtil.getCurrentTime());
+            getNetworkClient().updateStatus("last seen at "+AppUtil.getCurrentTime());
             if(bound) {
                 unbindService(mConnection);
                 bound = false;
@@ -101,8 +97,9 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
             finish();
+            return  true;
         }
-        return true;
+        return false;
     }
 
     @Override

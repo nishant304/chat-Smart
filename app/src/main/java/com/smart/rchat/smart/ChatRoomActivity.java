@@ -1,12 +1,15 @@
 package com.smart.rchat.smart;
 
 import android.app.LoaderManager;
+import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -101,8 +104,6 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        FirebaseDatabase.getInstance().getReference().child("Users").
-                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("status").setValue("Online");
     }
 
     private void setupListView(){
@@ -145,30 +146,19 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         if(edMessageBox.getText().toString().equals("")){
             return;
         }
-        String message = edMessageBox.getText().toString();
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("/Messages");
-        HashMap<String,Object> hashMap = new HashMap<>();
-        hashMap.put("from",currUser.getUid());
-        hashMap.put("to",friendUserId);
-        hashMap.put("message",message);
-        hashMap.put("type",TYPE_MESSAGE);
-        ContentValues cv = new ContentValues();
-        cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
-        cv.put(RChatContract.MESSAGE_TABLE.message,hashMap.get("message").toString());
-        cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
-        cv.put(RChatContract.MESSAGE_TABLE.from,currUser.getUid());
-        cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_MESSAGE);
-        getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
-        ref.push().setValue(hashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                makeToast("success sending");
-            }
-        });
+        String message = edMessageBox.getText().toString();
+        getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,AppUtil.
+                getCVforMessafRequest(friendUserId,message));
+
+        getNetworkClient().sendMessage(friendUserId,message);
         edMessageBox.getText().clear();
     }
 
+
+    /***
+     * use the touch position to detect touch on camera icon
+     */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
@@ -210,7 +200,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             String fileUrl = "images/" + UUID.randomUUID()+".png";
@@ -237,7 +227,6 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
             getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
         }
     }
-    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

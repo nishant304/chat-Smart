@@ -38,7 +38,7 @@ public class FireBaseImpl implements IServerEndPoint {
     @Override
     public void sendMessage(MessageRequest messageRequest) {
         FirebaseDatabase.getInstance().getReference().child("/Messages").push().
-                setValue(AppUtil.getMessageRequest(messageRequest.getFrom(),
+                setValue(AppUtil.getMessageRequest(messageRequest.getTo(),
                         messageRequest.getMessage(),messageRequest.getType()));
     }
 
@@ -120,7 +120,7 @@ public class FireBaseImpl implements IServerEndPoint {
                         responseListener.onSuccess(null);
                     }
                 }else{
-                    responseListener.onError(task.getException());
+                    responseListener.onError(null);
                 }
             }
         });

@@ -212,7 +212,7 @@ public class ContactsListenerService extends Service {
         android.support.v4.app.NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this).
                 setContentTitle(idToName.get(friendUserId))
                 .setContentText(message)
-                .setSmallIcon(R.drawable.rchatlogo)
+                .setSmallIcon(R.drawable.zzz_alert)
                 .setContentIntent(resultPendingIntent);
 
         NotificationManager mNotifyMgr =

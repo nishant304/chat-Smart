@@ -35,6 +35,7 @@ import com.smart.rchat.smart.network.NetworkClient;
 import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 import com.smart.rchat.smart.util.RchatError;
+import com.vstechlab.easyfonts.EasyFonts;
 
 import org.json.JSONObject;
 
@@ -64,6 +65,18 @@ public class ChatRoomAdapter extends CursorAdapter {
     }
 
     @Override
+    public int getViewTypeCount() {
+        return 3;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        Cursor cursor = (Cursor) getItem(position);
+        int type = cursor.getInt(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.type));
+        return type-1 ;
+    }
+
+    @Override
     public void bindView(View view, final Context context, Cursor cursor) {
         String from = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.from));
         int type = cursor.getInt(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.type));
@@ -72,6 +85,10 @@ public class ChatRoomAdapter extends CursorAdapter {
         View rightView = view.findViewById(R.id.rlRight);
         View leftViewImg = view.findViewById(R.id.rlImgLeft);
         View rightViewImg = view.findViewById(R.id.rlImgRight);
+
+        View inContactLayout = view.findViewById(R.id.inContactLayout);
+        View outContactLayout = view.findViewById(R.id.outContactLayout);
+
 
         if (type == 1) {
             leftViewImg.setVisibility(View.GONE);
@@ -82,14 +99,16 @@ public class ChatRoomAdapter extends CursorAdapter {
 
             if (!from.equals(myId)) {
                 left.setText(cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message)));
+                left.setTypeface(EasyFonts.robotoThin(context));
                 rightView.setVisibility(View.GONE);
                 leftView.setVisibility(View.VISIBLE);
             } else {
                 rightView.setVisibility(View.VISIBLE);
                 leftView.setVisibility(View.GONE);
+                right.setTypeface(EasyFonts.robotoThin(context));
                 right.setText(cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message)));
             }
-        } else {
+        } else  if(type ==2) {
             rightView.setVisibility(View.GONE);
             leftView.setVisibility(View.GONE);
 
@@ -110,7 +129,10 @@ public class ChatRoomAdapter extends CursorAdapter {
                 final ImageView rightImageView = (ImageView) view.findViewById(R.id.ivOutImg);
                 final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.pbRight);
                 final String url = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
-               // Bitmap bitmap = AppData.getInstance().getLruCache().get(url);
+                Bitmap bitmap = AppData.getInstance().getLruCache().get(url);
+                if(bitmap!=null){
+                    rightImageView.setImageBitmap(bitmap);
+                }
 
                 //rightImageView.setImageBitmap(bitmap);
                 NetworkClient.getInstance().uploadBitMap(url, new ResponseListener() {
@@ -120,14 +142,21 @@ public class ChatRoomAdapter extends CursorAdapter {
                                 .load(FirebaseStorage.getInstance().getReference(url))
                                 .into(rightImageView);
                         progressBar.setVisibility(View.GONE);
+                        NetworkClient.getInstance().sendImageRequest(friendUserId,url);
                     }
 
                     @Override
                     public void onError(Exception error) {
+
+                        Glide.with(context).using(new FirebaseImageLoader())
+                                .load(FirebaseStorage.getInstance().getReference(url))
+                                .into(rightImageView);
                         progressBar.setVisibility(View.GONE);
                     }
                 });
             }
+        }else{
+
 
         }
     }

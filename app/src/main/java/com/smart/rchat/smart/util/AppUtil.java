@@ -69,13 +69,13 @@ public class AppUtil {
         return  hashMap;
     }
 
-    public  static ContentValues getCVforMessafRequest (String friendUserId, String message){
+    public  static ContentValues getCVforMessafRequest (String friendUserId, String message,int type){
         ContentValues cv = new ContentValues();
         cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
         cv.put(RChatContract.MESSAGE_TABLE.message,message);
         cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
         cv.put(RChatContract.MESSAGE_TABLE.from,FirebaseAuth.getInstance().getCurrentUser().getUid());
-        cv.put(RChatContract.MESSAGE_TABLE.type,ChatRoomActivity.TYPE_MESSAGE);
+        cv.put(RChatContract.MESSAGE_TABLE.type,type);
         return  cv;
     }
 

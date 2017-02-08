@@ -18,11 +18,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="3dp"
+            android:textColor="@android:color/black"
             android:text="TextView"
             android:textSize="20sp"
             emojicon:emojiconSize="28sp" />
     </RelativeLayout>
-
 
     <RelativeLayout
         android:id="@+id/rlRight"
@@ -39,6 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="3dp"
+            android:textColor="@android:color/white"
             android:text="TextView"
             android:textSize="20sp" />
     </RelativeLayout>
@@ -98,7 +99,24 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:visibility="visible" />
-
-
     </RelativeLayout>
+
+    <include layout="@layout/message_contact_layout"
+        android:id="@+id/inContactLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:layout_alignParentLeft="true"
+        >
+    </include>
+
+    <include layout="@layout/message_contact_layout"
+        android:id="@+id/outContactLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        android:layout_alignParentRight="true"
+        >
+    </include>
+
 </RelativeLayout>

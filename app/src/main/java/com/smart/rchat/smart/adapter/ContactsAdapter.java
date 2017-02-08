@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.database.RChatContract;
+import com.vstechlab.easyfonts.EasyFonts;
 
 /**
  * Created by nishant on 1/25/2017.
@@ -79,6 +80,9 @@ class Holder extends RecyclerView.ViewHolder {
         this.tvName = (TextView) itemView.findViewById(R.id.tvName);
         this.tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
         this.view = itemView;
+        textview.setTypeface(EasyFonts.robotoLight(itemView.getContext()));
+        tvName.setTypeface(EasyFonts.robotoBold(itemView.getContext()));
     }
+
 }
 

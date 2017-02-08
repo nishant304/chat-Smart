@@ -9,6 +9,7 @@
         android:id="@+id/smiley"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
         android:background="@android:color/white"
         android:src="@drawable/smiley"/>
 
@@ -17,12 +18,14 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="6"
-        android:background="@android:color/white"
-        style="@style/Base.V7.Widget.AppCompat.EditText"
-        android:textColor="@android:color/black"
-        android:textColorHint="@android:color/black"
+        android:drawablePadding="10dp"
+        android:background="@drawable/bg_chat_edittext"
+        style="@style/Base.V12.Widget.AppCompat.EditText"
         android:drawableRight="@drawable/zzz_camera"
+        android:textColorHint="#91A2A6"
+        android:textColor="@android:color/black"
         android:paddingLeft="10dp"
+        android:layout_marginRight="3dp"
         android:hint="send message"
         emojicon:emojiconSize="28sp"
         android:inputType="textPersonName" />

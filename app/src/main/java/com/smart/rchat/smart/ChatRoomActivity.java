@@ -36,6 +36,7 @@ import com.smart.rchat.smart.adapter.ChatRoomAdapter;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
+import com.vstechlab.easyfonts.EasyFonts;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -91,6 +92,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         name = getIntent().getStringExtra("name");
 
         send.setOnClickListener(this);
+        edMessageBox.setTypeface(EasyFonts.robotoMedium(this));
         View rootView = findViewById(R.id.rootView);
         EmojIconActions emojIcon=new EmojIconActions(this,rootView,edMessageBox,emoji);
         emojIcon.ShowEmojIcon();
@@ -149,8 +151,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
 
         String message = edMessageBox.getText().toString();
         getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,AppUtil.
-                getCVforMessafRequest(friendUserId,message));
-
+                getCVforMessafRequest(friendUserId,message,1));
         getNetworkClient().sendMessage(friendUserId,message);
         edMessageBox.getText().clear();
     }
@@ -248,6 +249,10 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
             startActivityForResult(chooserIntent, PICK_IMAGE);
             return  true;
+        }else if(item.getItemId() == R.id.action_send_contact){
+            getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,AppUtil.
+                    getCVforMessafRequest(friendUserId,message,3));
+            getNetworkClient().sendContactRequest(friendUserId,message);
         }
 
         return false;

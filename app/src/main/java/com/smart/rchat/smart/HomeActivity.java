@@ -43,7 +43,7 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     IContactListener listener;
 
-    private String id = "";+
+    private String id = "";
     boolean bound;
 
     @Override

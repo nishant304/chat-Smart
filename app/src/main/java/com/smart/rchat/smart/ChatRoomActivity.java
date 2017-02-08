@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,9 +39,12 @@ import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 import com.vstechlab.easyfonts.EasyFonts;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,6 +81,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
 
     private static  final int REQUEST_IMAGE_CAPTURE = 1;
     private static  final int PICK_IMAGE = 2;
+    private static  final int PICK_CONTACT = 3;
 
     FirebaseUser currUser = FirebaseAuth.getInstance().getCurrentUser();
     private String friendUserId;
@@ -227,6 +232,40 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
             cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_IMAGE);
             getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
         }
+
+        if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+
+            AsyncQueryHandler as = new AsyncQueryHandler(getContentResolver()) {
+                @Override
+                protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                    try {
+                        while (cursor.moveToNext()) {
+                            JSONObject message = new JSONObject();
+
+                            String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                            Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+                            number = number.trim().replace(" ", "").replace("-", "").replace("+", "");
+                            if (p.matcher(number).find()) {
+                                continue;
+                            }
+                            message.put("number", number);
+                            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                            message.put("name", name);
+                            getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, AppUtil.
+                                    getCVforMessafRequest(friendUserId, message.toString(), 3));
+                            getNetworkClient().sendContactRequest(friendUserId, message.toString());
+                        }
+                        cursor.close();
+                    }catch(Exception e){
+
+                    }
+                }
+            };
+            as.startQuery(1,null,uri,new String[]
+                    {ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME},null,null,null);
+
+        }
     }
 
     @Override
@@ -250,9 +289,10 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
             startActivityForResult(chooserIntent, PICK_IMAGE);
             return  true;
         }else if(item.getItemId() == R.id.action_send_contact){
-            getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,AppUtil.
-                    getCVforMessafRequest(friendUserId,message,3));
-            getNetworkClient().sendContactRequest(friendUserId,message);
+
+            Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+            startActivityForResult(contactPickerIntent,PICK_CONTACT);
         }
 
         return false;

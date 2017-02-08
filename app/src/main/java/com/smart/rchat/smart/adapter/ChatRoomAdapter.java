@@ -61,7 +61,13 @@ public class ChatRoomAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return inflater.inflate(R.layout.chat_room_item, parent, false);
+        int type = cursor.getInt(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.type));
+        if(type ==1){
+            return inflater.inflate(R.layout.chat_message_layout, parent, false);
+        }else if(type == 2){
+            return inflater.inflate(R.layout.image_message_layout, parent, false);
+        }
+        return inflater.inflate(R.layout.contact_message_layout, parent, false);
     }
 
     @Override
@@ -81,18 +87,10 @@ public class ChatRoomAdapter extends CursorAdapter {
         String from = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.from));
         int type = cursor.getInt(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.type));
 
-        View leftView = view.findViewById(R.id.rlLeft);
-        View rightView = view.findViewById(R.id.rlRight);
-        View leftViewImg = view.findViewById(R.id.rlImgLeft);
-        View rightViewImg = view.findViewById(R.id.rlImgRight);
-
-        View inContactLayout = view.findViewById(R.id.inContactLayout);
-        View outContactLayout = view.findViewById(R.id.outContactLayout);
-
 
         if (type == 1) {
-            leftViewImg.setVisibility(View.GONE);
-            rightViewImg.setVisibility(View.GONE);
+            View leftView = view.findViewById(R.id.rlLeft);
+            View rightView = view.findViewById(R.id.rlRight);
 
             TextView left = (TextView) view.findViewById(R.id.tvLeft);
             TextView right = (TextView) view.findViewById(R.id.tvRight);
@@ -109,8 +107,9 @@ public class ChatRoomAdapter extends CursorAdapter {
                 right.setText(cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message)));
             }
         } else  if(type ==2) {
-            rightView.setVisibility(View.GONE);
-            leftView.setVisibility(View.GONE);
+
+            View leftViewImg = view.findViewById(R.id.rlImgLeft);
+            View rightViewImg = view.findViewById(R.id.rlImgRight);
 
             if (!from.equals(myId)) {
                 leftViewImg.setVisibility(View.VISIBLE);
@@ -156,8 +155,40 @@ public class ChatRoomAdapter extends CursorAdapter {
                 });
             }
         }else{
+            View inContactLayout = view.findViewById(R.id.inContactLayout);
+            View outContactLayout = view.findViewById(R.id.outContactLayout);
 
 
+            if (!from.equals(myId)) {
+                outContactLayout.setVisibility(View.GONE);
+                inContactLayout.setVisibility(View.VISIBLE);
+                TextView name = (TextView) inContactLayout.findViewById(R.id.tvContactName);
+                TextView number = (TextView)inContactLayout.findViewById(R.id.tvContactNumber);
+                final String message = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
+                try {
+                    JSONObject json = new JSONObject(message);
+                    name.setText(json.getString("name"));
+                    number.setText(json.getString("number"));
+                }catch(Exception e){
+
+                }
+
+            }else{
+                outContactLayout.setVisibility(View.VISIBLE);
+                inContactLayout.setVisibility(View.GONE);
+
+                TextView name = (TextView)outContactLayout.findViewById(R.id.tvContactName);
+                TextView number = (TextView)outContactLayout.findViewById(R.id.tvContactNumber);
+                final String message = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
+                try {
+                    JSONObject json = new JSONObject(message);
+                    name.setText(json.getString("name"));
+                    number.setText(json.getString("number"));
+                }catch(Exception e){
+
+                }
+            }
         }
     }
+
 }

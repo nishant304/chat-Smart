@@ -61,4 +61,8 @@ public class NetworkClient {
         serverEndPoint.uploadPhoto(url, AppData.getInstance().getLruCache().get(url),responseListener);
     }
 
+    public  void createGroup(String gr,Bitmap bitmap, String[] user,ResponseListener responseListener){
+        serverEndPoint.createGroup(gr,bitmap,user,responseListener);
+    }
+
 }

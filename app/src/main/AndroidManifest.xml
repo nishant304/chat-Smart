@@ -34,6 +34,9 @@
             android:parentActivityName=".HomeActivity"
             android:launchMode="singleInstance"
             />
+        <activity android:name=".GroupItemSelectActivity"
+            android:parentActivityName=".HomeActivity"
+            android:screenOrientation="portrait"/>
 
         <provider
             android:name=".database.RChatContentProvider"

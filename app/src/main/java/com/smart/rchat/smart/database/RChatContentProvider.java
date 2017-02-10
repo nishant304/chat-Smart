@@ -103,7 +103,7 @@ public class RChatContentProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase sqLiteDatabase) {
             sqLiteDatabase.execSQL("create table " + RChatContract.USER_TABLE.TABLE_NAME
-                    + " (  " + " ID INTEGER PRIMARY KEY , " + RChatContract.USER_TABLE.USER_ID + " TEXT , " +
+                    + " (  " + " _id INTEGER PRIMARY KEY , " + RChatContract.USER_TABLE.USER_ID + " TEXT , " +
                     RChatContract.USER_TABLE.USER_NAME + " TEXT , " +
                     RChatContract.USER_TABLE.PROFILE_PIC + " TEXT , " +
                     RChatContract.USER_TABLE.PHONE + " TEXT unique , "

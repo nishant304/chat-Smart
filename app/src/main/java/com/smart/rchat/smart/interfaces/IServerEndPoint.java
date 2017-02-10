@@ -28,4 +28,6 @@ public interface IServerEndPoint {
 
     void updatePhoneNo(String phoneNumber,ResponseListener responseListener);
 
+    void createGroup(String groupName,Bitmap bitmap,String [] userIDs,ResponseListener responseListener);
+
 }

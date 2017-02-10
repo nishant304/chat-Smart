@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.smart.rchat.smart.R;
@@ -16,45 +17,49 @@ import com.vstechlab.easyfonts.EasyFonts;
  * Created by nishant on 1/25/2017.
  */
 
-public class ContactsAdapter extends RecyclerView.Adapter<Holder> {
+public class ContactsAdapter extends CursorAdapter {
 
     private final Cursor cursor;
     private final LayoutInflater inflater;
-    private View.OnClickListener onClickListener;
+
 
     public ContactsAdapter(Context context, Cursor cursor) {
+        super(context,cursor,false);
         this.cursor = cursor;
         this.inflater = LayoutInflater.from(context);
-        this.onClickListener = (View.OnClickListener) context;
+
     }
 
     @Override
-    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.item_view, parent, false);
-        return new Holder(view);
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return inflater.inflate(R.layout.item_view, parent, false);
     }
 
     @Override
-    public void onBindViewHolder(Holder holder, int position) {
-        cursor.moveToPosition(position);
+    public void bindView(View itemView, Context context, Cursor cursor) {
         String userId = cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID));
         String name = cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_NAME));
-        holder.view.setTag(new NameIdPair(name,userId));
-        holder.view.setOnClickListener(onClickListener);
-        holder.textview.setText(cursor.getString(
+
+        TextView  textview = (TextView) itemView.findViewById(R.id.tvNumber);
+        TextView  tvName = (TextView) itemView.findViewById(R.id.tvName);
+        TextView  tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
+
+        itemView.setTag(new NameIdPair(name,userId));
+
+        textview.setText(cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE)));
-        holder.tvInvite.setVisibility(cursor.getString(
+        tvInvite.setVisibility(cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID)) == null ? View.VISIBLE : View.GONE);
-        holder.tvName.setText(name);
+        tvName.setText(name);
+
     }
 
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return cursor == null ? 0 : cursor.getCount();
     }
-
 
     public static  class NameIdPair{
         public String name;
@@ -67,22 +72,4 @@ public class ContactsAdapter extends RecyclerView.Adapter<Holder> {
 
 }
 
-class Holder extends RecyclerView.ViewHolder {
-
-    public final TextView textview;
-    public final TextView tvName;
-    public final TextView tvInvite;
-    final View view;
-
-    public Holder(View itemView) {
-        super(itemView);
-        this.textview = (TextView) itemView.findViewById(R.id.tvNumber);
-        this.tvName = (TextView) itemView.findViewById(R.id.tvName);
-        this.tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
-        this.view = itemView;
-        textview.setTypeface(EasyFonts.robotoLight(itemView.getContext()));
-        tvName.setTypeface(EasyFonts.robotoBold(itemView.getContext()));
-    }
-
-}
 

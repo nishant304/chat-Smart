@@ -31,15 +31,7 @@ import butterknife.ButterKnife;
  * Created by nishant on 1/23/2017.
  */
 
-public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,View.OnClickListener {
-
-    @BindView(R.id.toolbar2)
-    public Toolbar toolbar;
-
-    @BindView(R.id.rvHomeScreen)
-    public RecyclerView recyclerView;
-
-    private ContactsAdapter contactsAdapter;
+public class HomeActivity extends ContactActivity implements View.OnClickListener {
 
     IContactListener listener;
 
@@ -49,16 +41,19 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_screen);
-        setSupportActionBar(toolbar);
         startService();
-        getLoaderManager().initLoader(0,null,this);
     }
 
     private void startService() {
         Intent intent = new Intent(HomeActivity.this, ContactsListenerService.class);
         startService(intent);
         bindService(intent,mConnection,BIND_EXTERNAL_SERVICE);
+    }
+
+    @Override
+    protected void onCursorLoaded(Cursor cursor) {
+        HomeScreenAdapter contactsAdapter = new HomeScreenAdapter(HomeActivity.this,cursor);//fix me
+        getListView().setAdapter(contactsAdapter);
     }
 
     @Override
@@ -98,26 +93,12 @@ public class HomeActivity extends BaseActivity implements LoaderManager.LoaderCa
             startActivity(intent);
             finish();
             return  true;
+        }else if(item.getItemId() == R.id.action_create_group){
+            Intent intent = new Intent(this,GroupItemSelectActivity.class);
+            startActivity(intent);
+            return  true;
         }
         return false;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,RChatContract.USER_TABLE.CONTENT_URI,null,null,null,null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if(cursor == null) return;
-        ContactsAdapter contactsAdapter = new ContactsAdapter(HomeActivity.this,cursor);//fix me
-        recyclerView.setAdapter(contactsAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 
     @Override

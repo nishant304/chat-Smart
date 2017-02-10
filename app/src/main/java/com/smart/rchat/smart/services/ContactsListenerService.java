@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -27,6 +28,8 @@ import com.smart.rchat.smart.IContactListener;
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.util.AppUtil;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +60,8 @@ public class ContactsListenerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         FirebaseApp.initializeApp(this);
         updateDb();
-        listenForMessages();
+        listenForMessages(AppUtil.getUserId());
+        listenForGroupMessages();
         return START_STICKY;
     }
 
@@ -138,13 +142,12 @@ public class ContactsListenerService extends Service {
 
             }
         });
-
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
 
-        if(!stopTask) {
+        if (!stopTask) {
 
             Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
             restartServiceIntent.setPackage(getPackageName());
@@ -161,51 +164,83 @@ public class ContactsListenerService extends Service {
     }
 
 
-    private void listenForMessages() {
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //Fixme
+    private void listenForMessages(final String userId) {
 
-        if (user != null) {
-            FirebaseDatabase.getInstance().getReference().child("/Messages").orderByChild("/to").limitToLast(1).equalTo(user.getUid()).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                    if (map == null) {
+        if (userId == null) {
+            return;
+        }
+
+        FirebaseDatabase.getInstance().getReference().child("/Messages").orderByChild("/to").
+                limitToLast(1).equalTo(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                if (map == null) {
+                    return;
+                }
+                Set<String> set = map.keySet();
+                for (String s : set) {
+                    HashMap<String, Object> hm = (HashMap<String, Object>) map.get(s);
+                    int type = Integer.valueOf(hm.get("type").toString());
+                    if (type == 4) {
+                        handleGroupRequest(hm);
                         return;
                     }
-                    Set<String> set = map.keySet();
-                    for (String s : set) {
-                        HashMap<String, Object> hm = (HashMap<String, Object>) map.get(s);
-                        ContentValues cv = new ContentValues();
-                        cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
-                        cv.put(RChatContract.MESSAGE_TABLE.type, Integer.valueOf(hm.get("type").toString()));
-                        cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
-                        cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                        cv.put(RChatContract.MESSAGE_TABLE.to, user.getUid());
-                        //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
-                        getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
-                        try {
-                            if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
-                                createNotification(hm.get("from").toString(), hm.get("message").toString());
-                            }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
+                    ContentValues cv = new ContentValues();
+                    cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
+                    cv.put(RChatContract.MESSAGE_TABLE.type, type);
+                    cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
+                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
+                    cv.put(RChatContract.MESSAGE_TABLE.to, userId);
+                    //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
+                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
+                    try {
+                        if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
+                            createNotification(hm.get("from").toString(), hm.get("message").toString(),false);
                         }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
-
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            }
 
-                }
-            });
-        }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    private void createNotification(String friendUserId, String message) {
+    private void listenForGroupMessages() {
+        String userId = AppUtil.getUserId();
+        FirebaseDatabase.getInstance().getReference().child("/Users").child("/" + userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                ArrayList<String> groupList = (ArrayList<String>) map.get("groups");
+                if (groupList == null) {
+                    return;
+                }
+
+                for (String groupId : groupList) {
+                    listenForMessages(groupId);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void createNotification(String friendUserId, String message,boolean isGroupReq) {
         Intent resultIntent = new Intent(this, ChatRoomActivity.class);
         resultIntent.putExtra("friend_user_id", friendUserId);
         resultIntent.putExtra("name", idToName.get(friendUserId) != null ? idToName.get(friendUserId) : "");
+        resultIntent.putExtra("isGroupReq", isGroupReq);
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -219,6 +254,23 @@ public class ContactsListenerService extends Service {
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(001, mBuilder.build());
     }
+
+    private void handleGroupRequest(HashMap<String, Object> map) {
+        //Fixme names
+        String message = map.get("message").toString();
+        try {
+            JSONObject jsonObject = new JSONObject(message);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
+            contentValues.put(RChatContract.USER_TABLE.USER_NAME, jsonObject.getString("name"));
+            contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
+            getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
+            createNotification(jsonObject.getString("groupId"), "new group request",true);
+        } catch (Exception e) {
+
+        }
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {

@@ -11,8 +11,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageMetadata;
@@ -26,8 +29,12 @@ import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 import com.smart.rchat.smart.util.RchatError;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created by nishant on 05.02.17.
@@ -39,17 +46,17 @@ public class FireBaseImpl implements IServerEndPoint {
     public void sendMessage(MessageRequest messageRequest) {
         FirebaseDatabase.getInstance().getReference().child("/Messages").push().
                 setValue(AppUtil.getMessageRequest(messageRequest.getTo(),
-                        messageRequest.getMessage(),messageRequest.getType()));
+                        messageRequest.getMessage(), messageRequest.getType()));
     }
 
     @Override
     public void createUser(String email, String password, final ResponseListener responseListener) {
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     responseListener.onSuccess(null);
-                }else{
+                } else {
                     String code = "something went wrong";
                     if (task.getException() instanceof FirebaseAuthException) {
                         FirebaseAuthException firebaseAuthException = (FirebaseAuthException) task.getException();
@@ -62,13 +69,13 @@ public class FireBaseImpl implements IServerEndPoint {
     }
 
     @Override
-    public void loginUser(String email, String password,final ResponseListener responseListener) {
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+    public void loginUser(String email, String password, final ResponseListener responseListener) {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     responseListener.onSuccess(null);
-                }else{
+                } else {
                     String code = "something went wrong";
                     if (task.getException() instanceof FirebaseAuthException) {
                         FirebaseAuthException firebaseAuthException = (FirebaseAuthException) task.getException();
@@ -96,30 +103,30 @@ public class FireBaseImpl implements IServerEndPoint {
         storageReference.getMetadata().addOnCompleteListener(new OnCompleteListener<StorageMetadata>() {
             @Override
             public void onComplete(@NonNull Task<StorageMetadata> task) {
-                if(!task.isSuccessful()) {
+                if (!task.isSuccessful()) {
                     Exception ex = task.getException();
                     if (ex instanceof StorageException) {
                         StorageException st = (StorageException) ex;
                         if (st.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
-                            if(bitmap == null){
+                            if (bitmap == null) {
                                 responseListener.onError(null);
                                 return;
                             }
                             AppUtil.uploadBitmap(url, bitmap, new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                    if(task.isSuccessful()){
+                                    if (task.isSuccessful()) {
                                         responseListener.onSuccess(null);
-                                    }else{
+                                    } else {
                                         responseListener.onError(task.getException());
                                     }
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         responseListener.onSuccess(null);
                     }
-                }else{
+                } else {
                     responseListener.onError(null);
                 }
             }
@@ -141,4 +148,95 @@ public class FireBaseImpl implements IServerEndPoint {
     public void updatePhoneNo(String phoneNumber, ResponseListener responseListener) {
 
     }
+
+    @Override
+    public void createGroup(final String groupName, Bitmap bitmap, final String[] userIDs, final ResponseListener responseListener) {
+
+        if (bitmap == null) {
+            try {
+                handleCreateGroupRequest(groupName, "", userIDs, responseListener);
+            }catch (Exception e){
+
+            }
+            return;
+        }
+
+        final String fileUrl = "images/" + UUID.randomUUID() + ".png";
+
+        uploadPhoto(fileUrl, bitmap, new ResponseListener() {
+            @Override
+            public void onSuccess(JSONObject jsonObject) {
+                try {
+                    handleCreateGroupRequest(groupName, fileUrl, userIDs, responseListener);
+                }catch (Exception e){
+
+                }
+            }
+
+            @Override
+            public void onError(Exception error) {
+                responseListener.onError(new RchatError(""));
+            }
+        });
+    }
+
+
+    private void handleCreateGroupRequest(String groupName, final String fileUrl, final String[] userIDs,
+                                          final ResponseListener responseListener) throws Exception {
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", groupName);
+        jsonObject.put("url", fileUrl);
+        jsonObject.put("members", userIDs);
+
+        DatabaseReference newRef=  FirebaseDatabase.getInstance().getReference().child("group").push();
+        final String key = newRef.getKey();
+        newRef.setValue(jsonObject).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                 if(task.isSuccessful()){
+                     //Fixme if flow breaks
+                     FirebaseDatabase.getInstance().getReference().child("/Users").child("/"+FirebaseAuth.
+                             getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            HashMap<String,Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                             ArrayList<String> list = (ArrayList<String>) map.get("groups");
+                             if(list == null){
+                                 list = new ArrayList<String>();
+                             }
+                             list.add(key);
+                             map.put("groups",list);
+                             dataSnapshot.getRef().setValue(map);
+
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError databaseError) {
+
+                         }
+                     });
+
+
+                     try {
+                         jsonObject.put("groupId", key);
+                         responseListener.onSuccess(jsonObject);
+                         notifyMembers(userIDs,jsonObject);
+                     }catch (Exception e){
+
+                     }
+                 }else{
+                     responseListener.onError(task.getException());
+                 }
+            }
+        });
+    }
+
+    private void notifyMembers(String [] members,JSONObject jsonObject){
+        for(String member:members){
+            sendMessage(new MessageRequest(member,FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    jsonObject.toString(), 4));
+        }
+    }
+
 }

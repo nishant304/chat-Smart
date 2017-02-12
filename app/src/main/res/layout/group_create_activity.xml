@@ -3,17 +3,38 @@
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:id="@+id/rootView"
+    android:background="@color/colorPrimary"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/smiley"
-        android:layout_toRightOf="@+id/edGroupName"
-        android:layout_alignTop="@+id/edGroupName"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
+        android:orientation="horizontal"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="55dp"
         android:background="@android:color/white"
-        android:src="@drawable/smiley"/>
+        android:layout_height="30dp">
+
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+            android:id="@+id/edGroupName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:ems="16"
+            android:textColorHint="#91A2A6"
+            android:textColor="@android:color/black"
+            emojicon:emojiconSize="28sp"
+            android:background="@drawable/bg_chat_edittext"
+           />
+
+        <ImageView
+            android:id="@+id/smiley"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="right"
+            android:background="@android:color/white"
+            android:src="@drawable/smiley"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_marginTop="30dp"
@@ -24,18 +45,6 @@
         android:textSize="25sp"
         android:gravity="center"
         android:id="@+id/textView2" />
-
-    <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
-        android:id="@+id/edGroupName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="16"
-        android:textColorHint="#91A2A6"
-        android:textColor="@android:color/black"
-        emojicon:emojiconSize="28sp"
-        android:layout_below="@+id/textView3"
-        android:background="@drawable/bg_chat_edittext"
-        android:layout_marginTop="75dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"

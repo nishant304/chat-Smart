@@ -69,6 +69,7 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
                     intent.putExtra("friend_user_id",jsonObject.getString("groupId"));
                     intent.putExtra("name",groupName);
                     startActivity(intent);
+                    finish();
                 }catch (Exception e){
 
                 }

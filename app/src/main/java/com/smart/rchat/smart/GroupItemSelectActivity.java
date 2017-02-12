@@ -48,6 +48,16 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
     @Override
     public void onClick(View v) {
         SparseBooleanArray sparseBooleanArray =  getListView().getCheckedItemPositions();
+
+        if(sparseBooleanArray == null){
+            return;
+        }
+
+        if(sparseBooleanArray.size() ==0){
+            makeToast("Please select at lease one item");
+            return;
+        }
+
         ArrayList<String> list = new ArrayList<>();
         for(int i=0;i<sparseBooleanArray.size();i++){
 
@@ -62,9 +72,11 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
             users[i] = list.get(i);
         }
 
+
         Intent intent = new Intent(this,GroupCreateActivity.class);
         intent.putExtra("users",users);
         startActivity(intent);
+        finish();
     }
 
 }

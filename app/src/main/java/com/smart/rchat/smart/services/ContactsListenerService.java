@@ -12,8 +12,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -270,7 +273,7 @@ public class ContactsListenerService extends Service {
 
     private void listenForGroupMessages() {
         String userId = AppUtil.getUserId();
-        FirebaseDatabase.getInstance().getReference().child("/Users").child("/" + userId).addValueEventListener(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
@@ -315,13 +318,47 @@ public class ContactsListenerService extends Service {
         //Fixme names
         String message = map.get("message").toString();
         try {
-            JSONObject jsonObject = new JSONObject(message);
+            final JSONObject jsonObject = new JSONObject(message);
             ContentValues contentValues = new ContentValues();
             contentValues.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
             contentValues.put(RChatContract.USER_TABLE.USER_NAME, jsonObject.getString("name"));
             contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
             getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
             createNotification(jsonObject.getString("groupId"), "new group request",true);
+            FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
+                    getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    try {
+                        HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                        ArrayList<String> list = (ArrayList<String>) map.get("groups");
+                        if (list == null) {
+                            list = new ArrayList<String>();
+                        }
+                        list.add(jsonObject.getString("groupId"));
+                        map.put("groups", list);
+                        dataSnapshot.getRef().removeEventListener(this);
+                        dataSnapshot.getRef().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                try {
+                                    listenForMessages(jsonObject.getString("groupId"));
+                                }catch (Exception e){
+
+                                }
+                            }
+                        });
+                    }catch (Exception e){
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         } catch (Exception e) {
 
         }

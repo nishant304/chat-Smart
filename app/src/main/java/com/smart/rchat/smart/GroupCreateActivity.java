@@ -39,7 +39,7 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.group_create_activity);
 
-        userid = getIntent().getStringArrayExtra("userid");
+        userid = getIntent().getStringArrayExtra("users");
 
         View rootView = findViewById(R.id.rootView);
         EmojIconActions emojIcon=new EmojIconActions(this,rootView,editText,emoji);
@@ -66,6 +66,8 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
                     cv.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
                     getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, cv);
                     Intent intent = new Intent(GroupCreateActivity.this, ChatRoomActivity.class);
+                    intent.putExtra("friend_user_id",jsonObject.getString("groupId"));
+                    intent.putExtra("name",groupName);
                     startActivity(intent);
                 }catch (Exception e){
 

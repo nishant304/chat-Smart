@@ -181,22 +181,27 @@ public class FireBaseImpl implements IServerEndPoint {
     }
 
 
-    private void handleCreateGroupRequest(String groupName, final String fileUrl, final String[] userIDs,
+    private void handleCreateGroupRequest(final String groupName, final String fileUrl, final String[] userIDs,
                                           final ResponseListener responseListener) throws Exception {
 
-        final JSONObject jsonObject = new JSONObject();
+        final ArrayList<String> list= new ArrayList<>();
+        for(String us :userIDs){
+            list.add(us);
+        }
+
+        final HashMap<String,Object> jsonObject = new HashMap<>();
         jsonObject.put("name", groupName);
         jsonObject.put("url", fileUrl);
-        jsonObject.put("members", userIDs);
+        jsonObject.put("members", list);
 
-        DatabaseReference newRef=  FirebaseDatabase.getInstance().getReference().child("group").push();
+        DatabaseReference newRef=  FirebaseDatabase.getInstance().getReference("/Group").push();
         final String key = newRef.getKey();
         newRef.setValue(jsonObject).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                  if(task.isSuccessful()){
                      //Fixme if flow breaks
-                     FirebaseDatabase.getInstance().getReference().child("/Users").child("/"+FirebaseAuth.
+                     FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
                              getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                          @Override
                          public void onDataChange(DataSnapshot dataSnapshot) {
@@ -207,6 +212,7 @@ public class FireBaseImpl implements IServerEndPoint {
                              }
                              list.add(key);
                              map.put("groups",list);
+                             dataSnapshot.getRef().removeEventListener(this);
                              dataSnapshot.getRef().setValue(map);
 
                          }
@@ -220,8 +226,13 @@ public class FireBaseImpl implements IServerEndPoint {
 
                      try {
                          jsonObject.put("groupId", key);
-                         responseListener.onSuccess(jsonObject);
-                         notifyMembers(userIDs,jsonObject);
+                         JSONObject js = new JSONObject();
+                         js.put("groupId",key);
+                         js.put("url",fileUrl);
+                         js.put("name",groupName);
+                         js.put("members",list);
+                         responseListener.onSuccess(js);
+                         notifyMembers(userIDs,js);
                      }catch (Exception e){
 
                      }

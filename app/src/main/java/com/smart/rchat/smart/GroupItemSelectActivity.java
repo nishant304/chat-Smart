@@ -50,7 +50,9 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         SparseBooleanArray sparseBooleanArray =  getListView().getCheckedItemPositions();
         ArrayList<String> list = new ArrayList<>();
         for(int i=0;i<sparseBooleanArray.size();i++){
-            if(sparseBooleanArray.get(i)){
+
+            if(sparseBooleanArray.valueAt(i)){
+                cursor.moveToPosition(sparseBooleanArray.keyAt(i));
                 list.add(cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID)));
             }
         }

@@ -242,6 +242,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         public void onSuccess(JSONObject jsonObject) {
             hideDialog();
             makeToast("login success");
+            Intent intent = new Intent(LoginActivity.this, ContactsListenerService.class);
+            startService(intent);
         }
 
         @Override

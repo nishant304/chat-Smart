@@ -5,19 +5,18 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.v7.app.NotificationCompat;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -170,8 +169,64 @@ public class ContactsListenerService extends Service {
             return;
         }
 
-        FirebaseDatabase.getInstance().getReference().child("/Messages").orderByChild("/to").
-                limitToLast(1).equalTo(userId).addValueEventListener(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to")
+                .equalTo(userId).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String ss) {
+                HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
+                if (hm == null) {
+                    return;
+                }
+                    int type = Integer.valueOf(hm.get("type").toString());
+                    if (type == 4) {
+                        handleGroupRequest(hm);
+                        return;
+                    }
+                    ContentValues cv = new ContentValues();
+                    cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
+                    cv.put(RChatContract.MESSAGE_TABLE.type, type);
+                    cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
+                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
+                    cv.put(RChatContract.MESSAGE_TABLE.to, userId);
+                    //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
+                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
+                    try {
+                        if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
+                            createNotification(hm.get("from").toString(), hm.get("message").toString(),false);
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        }) ;
+
+
+
+/*
+        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to")
+                .equalTo(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
@@ -210,6 +265,7 @@ public class ContactsListenerService extends Service {
 
             }
         });
+*/
     }
 
     private void listenForGroupMessages() {

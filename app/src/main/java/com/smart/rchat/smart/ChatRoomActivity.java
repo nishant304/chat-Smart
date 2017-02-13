@@ -293,6 +293,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
             Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
             startActivityForResult(contactPickerIntent,PICK_CONTACT);
+            return  true;
         }
 
         return false;

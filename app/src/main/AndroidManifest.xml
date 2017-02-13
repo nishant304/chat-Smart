@@ -38,6 +38,7 @@
             android:parentActivityName=".HomeActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".GroupCreateActivity" />
+        <activity android:name=".UpdateProfileActivity" />
 
         <provider
             android:name=".database.RChatContentProvider"

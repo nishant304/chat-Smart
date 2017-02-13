@@ -62,8 +62,10 @@ public class ContactsListenerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         FirebaseApp.initializeApp(this);
         updateDb();
-        listenForMessages(AppUtil.getUserId());
-        listenForGroupMessages();
+        if(intent != null) { // hack for duplicate messages on service restart
+            listenForMessages(AppUtil.getUserId());
+            listenForGroupMessages();
+        }
         return START_STICKY;
     }
 

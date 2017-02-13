@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:background="@color/colorPrimary"
+    android:layout_height="match_parent">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_image"
+        android:layout_centerHorizontal="true"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        app:layout_marginTopPercent="25%"
+        app:civ_fill_color="@color/wallet_holo_blue_light"
+        android:src="@drawable/profile"
+        />
+
+    <Button
+        android:text="Change Picture"
+        app:layout_marginTopPercent="25%"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="82dp"
+        android:id="@+id/btChangePic"
+        android:layout_below="@+id/profile_image"
+        android:layout_centerHorizontal="true" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ivCamera"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:civ_fill_color="@color/wallet_holo_blue_light"
+        android:src="@drawable/zzz_camera"
+        android:layout_below="@+id/profile_image"
+        android:layout_centerHorizontal="true" />
+
+
+</android.support.percent.PercentRelativeLayout>

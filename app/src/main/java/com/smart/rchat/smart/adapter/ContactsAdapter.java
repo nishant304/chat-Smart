@@ -7,11 +7,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.database.RChatContract;
 import com.vstechlab.easyfonts.EasyFonts;
+
+import java.util.HashMap;
 
 /**
  * Created by nishant on 1/25/2017.
@@ -36,7 +47,7 @@ public class ContactsAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View itemView, Context context, Cursor cursor) {
+    public void bindView(View itemView, final Context context, Cursor cursor) {
         String userId = cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID));
         String name = cursor.getString(
@@ -45,6 +56,35 @@ public class ContactsAdapter extends CursorAdapter {
         TextView  textview = (TextView) itemView.findViewById(R.id.tvNumber);
         TextView  tvName = (TextView) itemView.findViewById(R.id.tvName);
         TextView  tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
+        final ImageView imv = (ImageView) itemView.findViewById(R.id.profile_image);
+        FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(
+                new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                dataSnapshot.getRef().removeEventListener(this);
+                HashMap<String,Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                if(map == null){
+                    return ;
+                }
+                String url = (String) map.get("profilePic");
+                if(url == null){
+                    return;
+                }
+                if(url.equals("")){
+                    return;
+                }
+
+                Glide.with(context).using(new FirebaseImageLoader())
+                        .load(FirebaseStorage.getInstance().getReference(url))
+                        .into(imv);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         itemView.setTag(new NameIdPair(name,userId));
 

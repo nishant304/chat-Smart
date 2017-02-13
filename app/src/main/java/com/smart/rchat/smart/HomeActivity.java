@@ -71,34 +71,41 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_signout){
-            //Fixme
-            getNetworkClient().updateStatus("last seen at "+AppUtil.getCurrentTime());
-            if(bound) {
-                unbindService(mConnection);
-                bound = false;
-            }
-            try {
-                if (listener != null) {
-                    listener.stopService();
-                }
-            }catch(Exception e){
-
-            }
-
-            FirebaseAuth.getInstance().signOut();
-            getContentResolver().delete(RChatContract.USER_TABLE.CONTENT_URI,null,null);
-            getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
-
-            Intent intent = new Intent(this,LoginActivity.class);
-            startActivity(intent);
-            finish();
+            onSignOutClicked();
             return  true;
         }else if(item.getItemId() == R.id.action_create_group){
             Intent intent = new Intent(this,GroupItemSelectActivity.class);
             startActivity(intent);
             return  true;
+        }else if(item.getItemId() == R.id.action_update_profile){
+            Intent intent = new Intent(this,UpdateProfileActivity.class);
+            startActivity(intent);
+            return  true;
         }
         return false;
+    }
+
+    private void onSignOutClicked(){
+        getNetworkClient().updateStatus("last seen at "+AppUtil.getCurrentTime());
+        if(bound) {
+            unbindService(mConnection);
+            bound = false;
+        }
+        try {
+            if (listener != null) {
+                listener.stopService();
+            }
+        }catch(Exception e){
+
+        }
+
+        FirebaseAuth.getInstance().signOut();
+        getContentResolver().delete(RChatContract.USER_TABLE.CONTENT_URI,null,null);
+        getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
+
+        Intent intent = new Intent(this,LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override

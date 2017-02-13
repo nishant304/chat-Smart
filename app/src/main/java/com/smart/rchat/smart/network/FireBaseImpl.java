@@ -1,8 +1,10 @@
 package com.smart.rchat.smart.network;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
@@ -250,4 +252,34 @@ public class FireBaseImpl implements IServerEndPoint {
         }
     }
 
+    @Override
+    public void loadBitMap(final Context context,String userId, final ImageView imageView) {
+        FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        dataSnapshot.getRef().removeEventListener(this);
+                        HashMap<String,Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                        if(map == null){
+                            return ;
+                        }
+                        String url = (String) map.get("profilePic");
+                        if(url == null){
+                            return;
+                        }
+                        if(url.equals("")){
+                            return;
+                        }
+
+                        Glide.with(context).using(new FirebaseImageLoader())
+                                .load(FirebaseStorage.getInstance().getReference(url))
+                                .into(imageView);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
 }

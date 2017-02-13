@@ -1,6 +1,8 @@
 package com.smart.rchat.smart.interfaces;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.widget.ImageView;
 
 import com.smart.rchat.smart.models.MessageRequest;
 
@@ -29,5 +31,7 @@ public interface IServerEndPoint {
     void updatePhoneNo(String phoneNumber,ResponseListener responseListener);
 
     void createGroup(String groupName,Bitmap bitmap,String [] userIDs,ResponseListener responseListener);
+
+    void loadBitMap(Context context,String url, ImageView imageView);
 
 }

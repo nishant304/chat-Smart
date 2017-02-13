@@ -53,7 +53,8 @@ public class UpdateProfileActivity extends BaseActivity  implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_profile);
-        
+        String id = getIntent().getStringExtra("id");
+        getNetworkClient().loadBitMap(this,id,profileImage);
         cameraView.setOnClickListener(this);
     }
 

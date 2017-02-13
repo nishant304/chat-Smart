@@ -79,6 +79,7 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
             return  true;
         }else if(item.getItemId() == R.id.action_update_profile){
             Intent intent = new Intent(this,UpdateProfileActivity.class);
+            intent.putExtra("id",AppUtil.getUserId());
             startActivity(intent);
             return  true;
         }

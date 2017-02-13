@@ -24,6 +24,7 @@
             android:layout_height="36dp"
             app:civ_fill_color="@color/wallet_holo_blue_light"
             android:src="@drawable/profile"
+            android:id="@+id/profile"
             />
 
         <LinearLayout

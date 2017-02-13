@@ -1,7 +1,9 @@
 package com.smart.rchat.smart.network;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
+import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.smart.rchat.smart.interfaces.IServerEndPoint;
@@ -63,6 +65,10 @@ public class NetworkClient {
 
     public  void createGroup(String gr,Bitmap bitmap, String[] user,ResponseListener responseListener){
         serverEndPoint.createGroup(gr,bitmap,user,responseListener);
+    }
+
+    public  void loadBitMap(Context context,String url, ImageView imageView){
+        serverEndPoint.loadBitMap(context,url,imageView);
     }
 
 }

@@ -124,8 +124,13 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
     private void setUpToolBar(){
         TextView tvName = (TextView) toolbar.findViewById(R.id.tbName);
         tvName.setText(name);
+        tvName.setOnClickListener(this);
+
+        ImageView im = (ImageView) toolbar.findViewById(R.id.profile);
+        getNetworkClient().loadBitMap(this,friendUserId,im);
 
         final  TextView tvLastSeen = (TextView) toolbar.findViewById(R.id.tbLastSeen);
+        tvLastSeen.setOnClickListener(this);
         FirebaseDatabase.getInstance().getReference().child("Users").child(friendUserId).child("status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -150,6 +155,17 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+
+        if(v.getId() == R.id.tbName){
+            openProfile();
+            return;
+        }
+
+        if(v.getId() == R.id.tbLastSeen){
+            openProfile();
+            return;
+        }
+
         if(edMessageBox.getText().toString().equals("")){
             return;
         }
@@ -159,6 +175,12 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
                 getCVforMessafRequest(friendUserId,message,1));
         getNetworkClient().sendMessage(friendUserId,message);
         edMessageBox.getText().clear();
+    }
+
+    private void  openProfile(){
+        Intent intent = new Intent(this,UpdateProfileActivity.class);
+        intent.putExtra("id",friendUserId);
+        startActivity(intent);
     }
 
 

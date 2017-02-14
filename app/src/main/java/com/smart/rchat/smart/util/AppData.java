@@ -16,6 +16,10 @@ public class AppData {
 
     private LruCache<String,Bitmap> lruCache;
 
+    private  Object dumpObject ;
+
+    private boolean isSafeToDump = true;
+
     public static AppData getInstance() {
         return ourInstance;
     }
@@ -24,5 +28,17 @@ public class AppData {
         lruCache = new LruCache<String, Bitmap>(50);
     }
 
+    public synchronized void dumpObject(Object o){
+        if(!isSafeToDump){
+            throw new IllegalStateException("previous dump not cleaned");
+        }
+        this.isSafeToDump = false;
+        this.dumpObject = o;
+    }
+
+    public synchronized Object getDumpObject() {
+        this.isSafeToDump = true;
+        return dumpObject;
+    }
 
 }

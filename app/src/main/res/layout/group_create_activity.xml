@@ -12,7 +12,8 @@
         android:layout_below="@+id/textView2"
         android:layout_marginTop="55dp"
         android:background="@android:color/white"
-        android:layout_height="30dp">
+        android:layout_height="30dp"
+        android:id="@+id/linearLayout">
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
             android:id="@+id/edGroupName"
@@ -54,5 +55,13 @@
         android:layout_margin="50dp"
         android:id="@+id/fab"
         android:src="@drawable/zzz_check"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvSelected"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

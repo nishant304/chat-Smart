@@ -3,7 +3,6 @@ package com.smart.rchat.smart.network;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -23,17 +22,15 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.smart.rchat.smart.ChatRoomActivity;
+import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.interfaces.IServerEndPoint;
 import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.MessageRequest;
-import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 import com.smart.rchat.smart.util.RchatError;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -264,10 +261,13 @@ public class FireBaseImpl implements IServerEndPoint {
                             return ;
                         }
                         String url = (String) map.get("profilePic");
+
                         if(url == null){
+                            imageView.setImageDrawable(context.getDrawable(R.drawable.profile));
                             return;
                         }
                         if(url.equals("")){
+                            imageView.setImageDrawable(context.getDrawable(R.drawable.profile));
                             return;
                         }
 
@@ -278,7 +278,7 @@ public class FireBaseImpl implements IServerEndPoint {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        imageView.setImageDrawable(context.getDrawable(R.drawable.profile));
                     }
                 });
     }

@@ -5,13 +5,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.smart.rchat.smart.adapter.GroupItemSelectAdapter;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.interfaces.ResponseListener;
+import com.smart.rchat.smart.models.User;
+import com.smart.rchat.smart.util.AppData;
 
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
@@ -32,6 +39,9 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.fab)
     public FloatingActionButton floatingActionButton;
 
+    @BindView(R.id.rvSelected)
+    public RecyclerView recyclerView;
+
     private  String [] userid;
 
     @Override
@@ -44,8 +54,11 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
         View rootView = findViewById(R.id.rootView);
         EmojIconActions emojIcon=new EmojIconActions(this,rootView,editText,emoji);
         emojIcon.ShowEmojIcon();
-
         floatingActionButton.setOnClickListener(this);
+
+        ArrayList<User> list = (ArrayList<User>) AppData.getInstance().getDumpObject();
+        recyclerView.setAdapter(new GroupItemSelectAdapter(this,list));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override

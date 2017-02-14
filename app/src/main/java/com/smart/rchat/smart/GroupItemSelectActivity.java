@@ -12,6 +12,8 @@ import android.widget.AbsListView;
 
 import com.smart.rchat.smart.adapter.ContactsAdapter;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.models.User;
+import com.smart.rchat.smart.util.AppData;
 
 import java.util.ArrayList;
 
@@ -59,11 +61,17 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         }
 
         ArrayList<String> list = new ArrayList<>();
+        ArrayList<User> userList = new ArrayList<>();
         for(int i=0;i<sparseBooleanArray.size();i++){
 
             if(sparseBooleanArray.valueAt(i)){
                 cursor.moveToPosition(sparseBooleanArray.keyAt(i));
-                list.add(cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID)));
+                String id = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID));
+                list.add(id);
+                String  name = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_NAME));
+                String  number = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE));
+                String url = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.PROFILE_PIC));
+                userList.add(new User(id,url,number,name));
             }
         }
 
@@ -71,6 +79,8 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         for(int i=0;i<list.size();i++){
             users[i] = list.get(i);
         }
+
+        AppData.getInstance().dumpObject(userList);
 
 
         Intent intent = new Intent(this,GroupCreateActivity.class);

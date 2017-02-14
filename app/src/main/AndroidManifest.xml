@@ -39,6 +39,7 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".GroupCreateActivity" />
         <activity android:name=".UpdateProfileActivity" />
+        <activity android:name=".ForgotPasswordActivity" />
 
         <provider
             android:name=".database.RChatContentProvider"

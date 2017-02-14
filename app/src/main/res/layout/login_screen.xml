@@ -83,7 +83,7 @@
         android:textColor="@color/colorButtonNormal"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="90dp"
-        android:id="@+id/textView" />
+        android:id="@+id/tvForgotPwd" />
 
 
 </RelativeLayout>

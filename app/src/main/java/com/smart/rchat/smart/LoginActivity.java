@@ -48,6 +48,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -279,6 +280,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         }
 
         return valid;
+    }
+
+    @OnClick(R.id.tvForgotPwd)
+    public void onForgotPassword(View view){
+        Intent intent = new Intent(this,ForgotPasswordActivity.class);
+        startActivity(intent);
     }
 
 }

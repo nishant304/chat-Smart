@@ -174,7 +174,7 @@ public class ContactsListenerService extends Service {
             return;
         }
 
-        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to")
+        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to").orderByKey()
                 .equalTo(userId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String ss) {

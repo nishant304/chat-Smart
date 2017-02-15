@@ -2,20 +2,28 @@ package com.smart.rchat.smart;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.ArrayRes;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 
 import com.smart.rchat.smart.adapter.ContactsAdapter;
+import com.smart.rchat.smart.adapter.GroupSelectAdapter;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppData;
+import com.smart.rchat.smart.util.AppUtil;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 
 import butterknife.BindView;
 
@@ -23,9 +31,11 @@ import butterknife.BindView;
  * Created by nishant on 08.02.17.
  */
 
-public class GroupItemSelectActivity extends ContactActivity implements View.OnClickListener {
+public class GroupItemSelectActivity extends ContactActivity implements View.OnClickListener,AdapterView.OnItemClickListener {
 
     private  Cursor cursor;
+
+    private GroupSelectAdapter groupSelectAdapter;
 
     @BindView(R.id.fab)
     public FloatingActionButton floatingActionButton;
@@ -34,6 +44,7 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        getListView().setOnItemClickListener(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Select contact");
         floatingActionButton.setVisibility(View.VISIBLE);
@@ -43,8 +54,8 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
     @Override
     protected void onCursorLoaded(Cursor cursor) {
         this.cursor = cursor;
-        ContactsAdapter contactsAdapter = new ContactsAdapter(GroupItemSelectActivity.this,cursor);//fix me
-        getListView().setAdapter(contactsAdapter);
+        groupSelectAdapter = new GroupSelectAdapter(GroupItemSelectActivity.this,cursor);
+        getListView().setAdapter(groupSelectAdapter);
     }
 
     @Override
@@ -87,6 +98,12 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         intent.putExtra("users",users);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        groupSelectAdapter.updateSelectedSet(position);
+        view.setBackgroundColor(groupSelectAdapter.getSelection(position)?Color.GRAY:Color.TRANSPARENT);
     }
 
 }

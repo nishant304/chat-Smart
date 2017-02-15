@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorButtonNormal">@color/colorButtonNormal </item>
         <item name="editTextStyle">@style/App_EditTextStyle</item>
+        <item name="android:windowBackground">@color/window</item>
     </style>
 
     <style name="App_EditTextStyle" parent="@android:style/Widget.EditText">

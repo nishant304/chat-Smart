@@ -1,67 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
     android:id="@+id/rootView"
-    android:background="@color/colorPrimary"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:layout_below="@+id/textView2"
-        android:layout_marginTop="55dp"
-        android:background="@android:color/white"
-        android:layout_height="30dp"
-        android:id="@+id/linearLayout">
-
-        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
-            android:id="@+id/edGroupName"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:ems="16"
-            android:textColorHint="#91A2A6"
-            android:textColor="@android:color/black"
-            emojicon:emojiconSize="28sp"
-            android:background="@drawable/bg_chat_edittext"
-           />
-
-        <ImageView
-            android:id="@+id/smiley"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"
-            android:layout_gravity="right"
-            android:background="@android:color/white"
-            android:src="@drawable/smiley"/>
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_marginTop="30dp"
-        android:text="Please enter a group name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:textSize="25sp"
-        android:gravity="center"
-        android:id="@+id/textView2" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="50dp"
-        android:id="@+id/fab"
-        android:src="@drawable/zzz_check"/>
+        android:src="@drawable/zzz_check" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvSelected"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/linearLayout"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout"
+        app:layout_heightPercent="60%" />
 
-</RelativeLayout>
+    <android.support.percent.PercentRelativeLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="25%">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Please enter a group name"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            android:textSize="20sp" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivGroupImage"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:src="@drawable/zzz_camera"
+            app:civ_fill_color="@color/wallet_holo_blue_light"
+            app:layout_widthPercent="20%" />
+
+        <ImageView
+            android:id="@+id/smiley"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:alpha="1"
+            android:src="@drawable/smiley"
+            app:layout_widthPercent="10%" />
+
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+            android:id="@+id/edGroupName"
+            style="@style/App_EditTextStyle"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/smiley"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toEndOf="@+id/ivGroupImage"
+            android:layout_toRightOf="@+id/ivGroupImage"
+            android:ems="14"
+            android:hint="group name"
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#91A2A6"
+            app:layout_widthPercent="65%"
+            emojicon:emojiconSize="28sp" />
+
+    </android.support.percent.PercentRelativeLayout>
+
+
+</android.support.percent.PercentRelativeLayout>

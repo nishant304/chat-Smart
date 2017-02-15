@@ -2,8 +2,10 @@ package com.smart.rchat.smart.adapter;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -162,13 +164,33 @@ public class ChatRoomAdapter extends CursorAdapter {
             if (!from.equals(myId)) {
                 outContactLayout.setVisibility(View.GONE);
                 inContactLayout.setVisibility(View.VISIBLE);
+
                 TextView name = (TextView) inContactLayout.findViewById(R.id.tvContactName);
                 TextView number = (TextView)inContactLayout.findViewById(R.id.tvContactNumber);
+
+                name.setTypeface(EasyFonts.robotoBold(context));
+                number.setTypeface(EasyFonts.robotoThin(context));
+
                 final String message = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
                 try {
-                    JSONObject json = new JSONObject(message);
+                   final  JSONObject json = new JSONObject(message);
                     name.setText(json.getString("name"));
                     number.setText(json.getString("number"));
+                    inContactLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                Intent contactIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+                                contactIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+                                contactIntent
+                                        .putExtra(ContactsContract.Intents.Insert.NAME, json.getString("name"))
+                                        .putExtra(ContactsContract.Intents.Insert.PHONE, json.getString("number"));
+                                context.startActivity(contactIntent);
+                            }catch (Exception e){
+                                
+                            }
+                        }
+                    });
                 }catch(Exception e){
 
                 }
@@ -179,6 +201,9 @@ public class ChatRoomAdapter extends CursorAdapter {
 
                 TextView name = (TextView)outContactLayout.findViewById(R.id.tvContactName);
                 TextView number = (TextView)outContactLayout.findViewById(R.id.tvContactNumber);
+                name.setTypeface(EasyFonts.robotoBold(context));
+                number.setTypeface(EasyFonts.robotoThin(context));
+
                 final String message = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
                 try {
                     JSONObject json = new JSONObject(message);

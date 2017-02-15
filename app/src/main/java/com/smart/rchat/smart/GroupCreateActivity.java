@@ -2,6 +2,7 @@ package com.smart.rchat.smart;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -15,14 +16,18 @@ import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppData;
+import com.smart.rchat.smart.util.AppUtil;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
+
+import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
 
 /**
  * Created by nishant on 09.02.17.
@@ -41,6 +46,13 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
 
     @BindView(R.id.rvSelected)
     public RecyclerView recyclerView;
+
+    @BindView(R.id.ivGroupImage)
+    public ImageView groupImage;
+
+    private int REQUEST_IMAGE_CAPTURE =1;
+
+    private Bitmap imageBitmap;
 
     private  String [] userid;
 
@@ -69,7 +81,7 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
             return;
         }
 
-        getNetworkClient().createGroup(groupName,null, userid,new ResponseListener(){
+        getNetworkClient().createGroup(groupName,imageBitmap, userid,new ResponseListener(){
             @Override
             public void onSuccess(JSONObject jsonObject) {
                 try {
@@ -94,4 +106,23 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
             }
         });
     }
+
+    @OnClick(R.id.ivGroupImage)
+    public void fetchGroupImage(View view){
+        Intent takePictureIntent = new Intent(ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            imageBitmap = (Bitmap) extras.get("data");
+            groupImage.setImageBitmap(imageBitmap);
+        }
+    }
+
 }

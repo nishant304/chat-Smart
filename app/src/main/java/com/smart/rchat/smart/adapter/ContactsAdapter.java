@@ -63,6 +63,9 @@ public class ContactsAdapter extends CursorAdapter {
 
         itemView.setTag(new NameIdPair(name,userId));
 
+        textview.setTypeface(EasyFonts.robotoBlack(context));
+        tvName.setTypeface(EasyFonts.robotoBold(context));
+
         textview.setText(cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE)));
         tvInvite.setVisibility(cursor.getString(

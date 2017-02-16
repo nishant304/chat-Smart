@@ -8,12 +8,16 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,7 +40,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -47,12 +50,17 @@ public class ContactsListenerService extends Service {
 
     private IActivityCallBack iActivityCallBack;
     private HashMap<String, String> idToName = new HashMap<>();
+    private HashMap<String, Boolean> groupId = new HashMap<>();
+
+    private  String key;
+
 
     private boolean stopTask = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
         getApplicationContext().getContentResolver().
                 registerContentObserver(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, false, new ContactsObserver());
         stopTask = false;
@@ -110,7 +118,7 @@ public class ContactsListenerService extends Service {
                     }
                 }
 
-                if (userID != null) {
+                if (userID != null&& !userID.equals(AppUtil.getUserId()) ) {
                     final String finalUserID = userID;
 
                     FirebaseDatabase.getInstance().getReference().child("/Users").child(userID).addValueEventListener(new ValueEventListener() {
@@ -122,6 +130,7 @@ public class ContactsListenerService extends Service {
                             contentValues.put(RChatContract.USER_TABLE.USER_NAME, name);
                             contentValues.put(RChatContract.USER_TABLE.PHONE, phoneNo);
                             contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, "");
+                            contentValues.put(RChatContract.USER_TABLE.type, 1);
                             getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
                             idToName.put(finalUserID, name);
                         }
@@ -131,12 +140,6 @@ public class ContactsListenerService extends Service {
 
                         }
                     });
-                } else {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(RChatContract.USER_TABLE.USER_ID, "");
-                    contentValues.put(RChatContract.USER_TABLE.PHONE, phoneNo);
-                    contentValues.put(RChatContract.USER_TABLE.USER_NAME, name);
-                    //getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI,contentValues) ;
                 }
 
             }
@@ -178,6 +181,12 @@ public class ContactsListenerService extends Service {
                 .equalTo(userId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String ss) {
+                if(ss!=null && ss.equals(key)){
+                   // return;
+                }
+                Log.d("nishant",""+ss);
+                key = ss;
+
                 HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
                 if (hm == null) {
                     return;
@@ -202,7 +211,6 @@ public class ContactsListenerService extends Service {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-                
 
             }
 
@@ -275,6 +283,9 @@ public class ContactsListenerService extends Service {
 
     private void listenForGroupMessages() {
         String userId = AppUtil.getUserId();
+        if(userId == null){
+            return;
+        }
         FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -319,12 +330,19 @@ public class ContactsListenerService extends Service {
     private void handleGroupRequest(HashMap<String, Object> map) {
         //Fixme names
         String message = map.get("message").toString();
+
         try {
             final JSONObject jsonObject = new JSONObject(message);
+            if(groupId.get(jsonObject.getString("groupId")) != null){  //hack ,Fix this
+                return;
+            }
+            groupId.put(jsonObject.getString("groupId"),true);
             ContentValues contentValues = new ContentValues();
             contentValues.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
             contentValues.put(RChatContract.USER_TABLE.USER_NAME, jsonObject.getString("name"));
             contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
+            contentValues.put(RChatContract.USER_TABLE.memebers, jsonObject.getJSONArray("members").toString());
+            contentValues.put(RChatContract.USER_TABLE.type, 2);
             getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
             createNotification(jsonObject.getString("groupId"), "new group request",true);
             FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
@@ -385,7 +403,22 @@ public class ContactsListenerService extends Service {
             stopTask = true;
             stopSelf();
             stopService();
+            //handler.sendMessageDelayed(null,1000);
         }
     };
 
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+
+            Intent in = new Intent(ContactsListenerService.this,ContactsListenerService.class);
+            stopService(in);
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
+    }
 }

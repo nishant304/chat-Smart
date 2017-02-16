@@ -1,5 +1,6 @@
 package com.smart.rchat.smart;
 
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -52,6 +53,13 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
     }
 
     @Override
+    protected CursorLoader getLoader() {
+        return new CursorLoader(this, RChatContract.USER_TABLE.CONTENT_URI,null,
+                RChatContract.USER_TABLE.type
+                +" =? ",new String[]{"1"},null);
+    }
+
+    @Override
     protected void onCursorLoaded(Cursor cursor) {
         this.cursor = cursor;
         groupSelectAdapter = new GroupSelectAdapter(GroupItemSelectActivity.this,cursor);
@@ -96,8 +104,7 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
 
         Intent intent = new Intent(this,GroupCreateActivity.class);
         intent.putExtra("users",users);
-        startActivity(intent);
-        finish();
+        startActivityForResult(intent,1);
     }
 
     @Override
@@ -106,4 +113,12 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         view.setBackgroundColor(groupSelectAdapter.getSelection(position)?Color.GRAY:Color.TRANSPARENT);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK){
+            startActivity(data);
+            finish();
+        }
+
+    }
 }

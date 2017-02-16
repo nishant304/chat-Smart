@@ -75,6 +75,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    private boolean didUserLogin;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +92,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     showDialog();
+                    Intent intent = new Intent(LoginActivity.this, ContactsListenerService.class);
+                    startService(intent);
                     sendHome();
                 }
             }
@@ -237,14 +241,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         UserAuthListener(){
             showDialog();
+            didUserLogin = true;
         }
 
         @Override
         public void onSuccess(JSONObject jsonObject) {
             hideDialog();
             makeToast("login success");
-            Intent intent = new Intent(LoginActivity.this, ContactsListenerService.class);
-            startService(intent);
         }
 
         @Override

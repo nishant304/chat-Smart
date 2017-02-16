@@ -13,6 +13,7 @@ import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.network.NetworkClient;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by nishant on 14.02.17.
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 public class GroupItemSelectAdapter extends RecyclerView.Adapter<GroupItemSelectAdapter.Holder> {
 
     private LayoutInflater inflater;
-    private ArrayList<User> list;
+    protected ArrayList<User> list;
 
     public GroupItemSelectAdapter(Context context, ArrayList<User> list){
         this.inflater = LayoutInflater.from(context);
@@ -36,9 +37,10 @@ public class GroupItemSelectAdapter extends RecyclerView.Adapter<GroupItemSelect
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        NetworkClient.getInstance().loadBitMap(holder.imageView.getContext(),list.get(position).getUserId(),holder.imageView);
-        holder.tvName.setText(list.get(position).getName());
-        holder.phone.setText(list.get(position).getPhone());
+        User user = list.get(position);
+        NetworkClient.getInstance().loadBitMap(holder.imageView.getContext(),user.getUserId(),holder.imageView,1);
+        holder.tvName.setText(user.getName());
+        holder.phone.setText(user.getPhone());
     }
 
     @Override

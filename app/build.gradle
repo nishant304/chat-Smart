@@ -48,6 +48,7 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-storage:0.6.0'
     compile 'com.vstechlab.easyfonts:easyfonts:1.0.0'
     compile 'com.android.support:percent:22.2.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'

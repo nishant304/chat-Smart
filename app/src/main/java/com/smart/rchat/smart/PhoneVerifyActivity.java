@@ -82,6 +82,7 @@ public class PhoneVerifyActivity extends BaseActivity implements View.OnClickLis
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
                                         makeToast("phone verification complete");
+                                        //FirebaseAuth.getInstance().getCurrentUser().
                                         Intent intent1 = new Intent(PhoneVerifyActivity.this, HomeActivity.class);
                                         startActivity(intent1);
                                         //phoneRef.child(phoneNo);  Fixme

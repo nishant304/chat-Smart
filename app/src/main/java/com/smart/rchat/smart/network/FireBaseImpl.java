@@ -29,6 +29,7 @@ import com.smart.rchat.smart.models.MessageRequest;
 import com.smart.rchat.smart.util.AppUtil;
 import com.smart.rchat.smart.util.RchatError;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -187,6 +188,7 @@ public class FireBaseImpl implements IServerEndPoint {
         for(String us :userIDs){
             list.add(us);
         }
+        list.add(AppUtil.getUserId());
 
         final HashMap<String,Object> jsonObject = new HashMap<>();
         jsonObject.put("name", groupName);
@@ -224,12 +226,16 @@ public class FireBaseImpl implements IServerEndPoint {
 
 
                      try {
+                         JSONArray js1 = new JSONArray();
+                         for(String ss:list){
+                             js1.put(ss);
+                         }
                          jsonObject.put("groupId", key);
                          JSONObject js = new JSONObject();
                          js.put("groupId",key);
                          js.put("url",fileUrl);
                          js.put("name",groupName);
-                         js.put("members",list);
+                         js.put("members",js1);
                          responseListener.onSuccess(js);
                          notifyMembers(userIDs,js);
                      }catch (Exception e){
@@ -250,8 +256,8 @@ public class FireBaseImpl implements IServerEndPoint {
     }
 
     @Override
-    public void loadBitMap(final Context context,String userId, final ImageView imageView) {
-        FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(
+    public void loadBitMap(final Context context,String userId, final ImageView imageView,final int type) {
+        FirebaseDatabase.getInstance().getReference().child(type==1?"Users":"Group").child(userId).addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -260,7 +266,7 @@ public class FireBaseImpl implements IServerEndPoint {
                         if(map == null){
                             return ;
                         }
-                        String url = (String) map.get("profilePic");
+                        String url = (String) map.get(type==1?"profilePic":"url");
 
                         if(url == null){
                             imageView.setImageDrawable(context.getDrawable(R.drawable.profile));

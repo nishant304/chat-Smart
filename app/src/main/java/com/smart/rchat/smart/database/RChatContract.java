@@ -23,6 +23,8 @@ public final class RChatContract {
         public  static  final  String PROFILE_PIC=  "profile_pic";
         public  static  final  String LAST_MESSAGE =  "last_message";
         public  static  final  String PHONE =  "phone";
+        public  static  final  String type =  "type";
+        public  static  final  String memebers =  "members";
     }
 
     public static class MESSAGE_TABLE implements BaseColumns{

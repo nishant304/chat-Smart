@@ -44,7 +44,7 @@ public abstract class ContactActivity extends BaseActivity {
 
         @Override
         public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-            return new CursorLoader(ContactActivity.this, RChatContract.USER_TABLE.CONTENT_URI,null,null,null,null);
+            return getLoader();
         }
 
         @Override
@@ -65,5 +65,7 @@ public abstract class ContactActivity extends BaseActivity {
     }
 
     protected  abstract void onCursorLoaded(Cursor cursor);
+
+    protected  abstract CursorLoader getLoader();
 
 }

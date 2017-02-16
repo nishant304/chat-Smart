@@ -89,11 +89,14 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
                     cv.put(RChatContract.USER_TABLE.USER_NAME, groupName);
                     cv.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
                     cv.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
+                    cv.put(RChatContract.USER_TABLE.type, 2);
+                    cv.put(RChatContract.USER_TABLE.memebers, jsonObject.getJSONArray("members").toString());
                     getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, cv);
                     Intent intent = new Intent(GroupCreateActivity.this, ChatRoomActivity.class);
                     intent.putExtra("friend_user_id",jsonObject.getString("groupId"));
                     intent.putExtra("name",groupName);
-                    startActivity(intent);
+                    setResult(RESULT_OK,intent);
+                    //startActivity(intent);
                     finish();
                 }catch (Exception e){
 
@@ -125,4 +128,9 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        finish();
+    }
 }

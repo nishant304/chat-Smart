@@ -32,6 +32,6 @@ public interface IServerEndPoint {
 
     void createGroup(String groupName,Bitmap bitmap,String [] userIDs,ResponseListener responseListener);
 
-    void loadBitMap(Context context,String url, ImageView imageView);
+    void loadBitMap(Context context,String url, ImageView imageView,int type);
 
 }

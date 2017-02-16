@@ -83,6 +83,8 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
     private static  final int PICK_IMAGE = 2;
     private static  final int PICK_CONTACT = 3;
 
+    int type;
+
     FirebaseUser currUser = FirebaseAuth.getInstance().getCurrentUser();
     private String friendUserId;
     private String name;
@@ -95,6 +97,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         setContentView(R.layout.fragment_chat_room);
         friendUserId = getIntent().getStringExtra("friend_user_id");
         name = getIntent().getStringExtra("name");
+        type = getIntent().getIntExtra("type",0);
 
         send.setOnClickListener(this);
         edMessageBox.setTypeface(EasyFonts.robotoMedium(this));
@@ -127,7 +130,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         tvName.setOnClickListener(this);
 
         ImageView im = (ImageView) toolbar.findViewById(R.id.profile);
-        getNetworkClient().loadBitMap(this,friendUserId,im);
+        getNetworkClient().loadBitMap(this,friendUserId,im,type);
 
         final  TextView tvLastSeen = (TextView) toolbar.findViewById(R.id.tbLastSeen);
         tvLastSeen.setOnClickListener(this);
@@ -178,11 +181,11 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
     }
 
     private void  openProfile(){
-        Intent intent = new Intent(this,UpdateProfileActivity.class);
+        Intent intent = new Intent(this,ProfileActivity.class);
         intent.putExtra("id",friendUserId);
+        intent.putExtra("type",type);
         startActivity(intent);
     }
-
 
     /***
      * use the touch position to detect touch on camera icon

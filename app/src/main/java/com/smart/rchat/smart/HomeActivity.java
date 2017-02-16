@@ -1,31 +1,23 @@
 package com.smart.rchat.smart;
 
-import android.app.LoaderManager;
 import android.content.ComponentName;
 import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.smart.rchat.smart.adapter.ContactsAdapter;
+import com.smart.rchat.smart.adapter.HomeScreenAdapter;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.services.ContactsListenerService;
 import com.smart.rchat.smart.util.AppUtil;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by nishant on 1/23/2017.
@@ -48,6 +40,12 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
         Intent intent = new Intent(HomeActivity.this, ContactsListenerService.class);
         //startService(intent);
         bindService(intent,mConnection,BIND_EXTERNAL_SERVICE);
+    }
+
+    @Override
+    protected CursorLoader getLoader() {
+        return new CursorLoader(this, RChatContract.USER_TABLE.CONTENT_URI,null,
+                null,null,null);
     }
 
     @Override
@@ -100,12 +98,15 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
 
         }
 
+        //Intent intent = new Intent(HomeActivity.this, ContactsListenerService.class);
+        //stopService(intent);
+
         FirebaseAuth.getInstance().signOut();
         getContentResolver().delete(RChatContract.USER_TABLE.CONTENT_URI,null,null);
         getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
 
-        Intent intent = new Intent(this,LoginActivity.class);
-        startActivity(intent);
+        Intent intent1 = new Intent(this,LoginActivity.class);
+        startActivity(intent1);
         finish();
     }
 
@@ -116,8 +117,8 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
         Intent intent = new Intent(HomeActivity.this,ChatRoomActivity.class);
         intent.putExtra("friend_user_id",id);
         intent.putExtra("name",nameIdPair.name);
+        intent.putExtra("type",nameIdPair.type);
         startActivity(intent);
-
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -160,4 +161,5 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
             unbindService(mConnection);
         }
     }
+
 }

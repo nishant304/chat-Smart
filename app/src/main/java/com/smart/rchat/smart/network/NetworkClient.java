@@ -67,8 +67,8 @@ public class NetworkClient {
         serverEndPoint.createGroup(gr,bitmap,user,responseListener);
     }
 
-    public  void loadBitMap(Context context,String url, ImageView imageView){
-        serverEndPoint.loadBitMap(context,url,imageView);
+    public  void loadBitMap(Context context,String url, ImageView imageView,int type){
+        serverEndPoint.loadBitMap(context,url,imageView,type);
     }
 
 }

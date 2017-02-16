@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -38,6 +39,9 @@ import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
 
 public class UpdateProfileActivity extends BaseActivity  implements View.OnClickListener{
 
+    @BindView(R.id.toolbar)
+    public Toolbar toolbar;
+
     @BindView(R.id.profile_image)
     public ImageView profileImage;
 
@@ -54,8 +58,10 @@ public class UpdateProfileActivity extends BaseActivity  implements View.OnClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_profile);
         String id = getIntent().getStringExtra("id");
-        getNetworkClient().loadBitMap(this,id,profileImage);
+        getNetworkClient().loadBitMap(this,id,profileImage,1);
         cameraView.setOnClickListener(this);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @OnClick(R.id.btChangePic)

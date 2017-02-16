@@ -50,6 +50,8 @@ public class ContactsAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View itemView, final Context context, Cursor cursor) {
+        int type = cursor.getInt(
+                cursor.getColumnIndex(RChatContract.USER_TABLE.type));
         String userId = cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID));
         String name = cursor.getString(
@@ -59,9 +61,9 @@ public class ContactsAdapter extends CursorAdapter {
         TextView  tvName = (TextView) itemView.findViewById(R.id.tvName);
         TextView  tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
         final ImageView imv = (ImageView) itemView.findViewById(R.id.profile_image);
-        NetworkClient.getInstance().loadBitMap(context, userId,imv);
+        NetworkClient.getInstance().loadBitMap(context, userId,imv,type);
 
-        itemView.setTag(new NameIdPair(name,userId));
+        itemView.setTag(new NameIdPair(name,userId,type));
 
         textview.setTypeface(EasyFonts.robotoBlack(context));
         tvName.setTypeface(EasyFonts.robotoBold(context));
@@ -82,9 +84,12 @@ public class ContactsAdapter extends CursorAdapter {
     public static  class NameIdPair{
         public String name;
         public String userId;
-        NameIdPair(String name,String userId){
+        public int type;
+
+        NameIdPair(String name,String userId,int type){
             this.name = name;
             this.userId = userId;
+            this.type =type;
         }
     }
 

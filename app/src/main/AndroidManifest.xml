@@ -35,11 +35,23 @@
             android:launchMode="singleInstance"
             />
         <activity android:name=".GroupItemSelectActivity"
+            android:launchMode="singleInstance"
             android:parentActivityName=".HomeActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".GroupCreateActivity" />
-        <activity android:name=".UpdateProfileActivity" />
-        <activity android:name=".ForgotPasswordActivity" />
+
+        <activity android:name=".GroupCreateActivity"
+            android:launchMode="singleInstance"
+            android:parentActivityName=".GroupItemSelectActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".UpdateProfileActivity"
+            android:screenOrientation="portrait"
+
+            android:parentActivityName=".HomeActivity"
+            />
+        <activity android:name=".ForgotPasswordActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ProfileActivity" />
 
         <provider
             android:name=".database.RChatContentProvider"

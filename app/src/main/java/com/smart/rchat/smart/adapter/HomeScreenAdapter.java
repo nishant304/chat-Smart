@@ -1,4 +1,4 @@
-package com.smart.rchat.smart;
+package com.smart.rchat.smart.adapter;
 
 import android.content.Context;
 import android.database.Cursor;

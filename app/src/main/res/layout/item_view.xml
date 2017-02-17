@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_margin="10dp"
-    android:background="@drawable/list_row_background"
     android:layout_height="wrap_content">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -11,6 +10,7 @@
         android:id="@+id/profile_image"
         android:layout_width="56dp"
         android:layout_height="56dp"
+        android:layout_centerVertical="true"
         app:civ_fill_color="@color/wallet_holo_blue_light"
         android:src="@drawable/profile"
         />
@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:layout_below="@+id/tvName"
+        android:maxLines="1"
         android:layout_toRightOf="@id/profile_image"
+        android:layout_alignBaseline="@+id/profile_image"
         android:id="@+id/tvNumber"
         tools:ignore="RtlHardcoded" />
 
@@ -39,11 +41,14 @@
 
     <TextView
         android:text="TextView"
-        android:layout_marginLeft="20dp"
-        android:layout_toRightOf="@id/profile_image"
         android:layout_width="wrap_content"
+        android:maxLines="1"
         style="@style/Base.TextAppearance.AppCompat.Medium"
         android:layout_height="wrap_content"
-        android:id="@+id/tvName" />
+        android:id="@+id/tvName"
+        android:layout_toRightOf="@+id/profile_image"
+        android:layout_alignLeft="@+id/tvNumber"
+        android:layout_marginTop="25dp"
+         />
 
 </RelativeLayout>

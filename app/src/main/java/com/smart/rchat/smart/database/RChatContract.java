@@ -35,5 +35,6 @@ public final class RChatContract {
         public  static  final  String from=  "from_user_id";
         public  static  final  String to=  "to_user_id";
         public  static  final  String time =  "time";
+        public  static  final  String msg_id =  "messageID";
     }
 }

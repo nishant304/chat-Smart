@@ -115,6 +115,7 @@ public class RChatContentProvider extends ContentProvider {
                     + " (  " + " _id INTEGER PRIMARY KEY , " + RChatContract.MESSAGE_TABLE.from + " TEXT , " +
                     RChatContract.MESSAGE_TABLE.message + " TEXT , " +
                     RChatContract.MESSAGE_TABLE.to + " TEXT , " +
+                    RChatContract.MESSAGE_TABLE.msg_id + " TEXT unique , " +
                     RChatContract.MESSAGE_TABLE.type + " INTEGER , "+
                     RChatContract.MESSAGE_TABLE.time + " TEXT );");
         }

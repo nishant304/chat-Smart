@@ -32,18 +32,18 @@ public class NetworkClient {
         return sInstance;
     }
 
-    public void sendMessage(String to,String message){
-        serverEndPoint.sendMessage(new MessageRequest(to,
+    public String sendMessage(String to,String message){
+      return  serverEndPoint.sendMessage(new MessageRequest(to,
                 FirebaseAuth.getInstance().getCurrentUser().getUid(),message,1));
     }
 
-    public void sendImageRequest(String to,String url){
-        serverEndPoint.sendMessage(new MessageRequest(to,
+    public String sendImageRequest(String to,String url){
+       return serverEndPoint.sendMessage(new MessageRequest(to,
                 FirebaseAuth.getInstance().getCurrentUser().getUid(),url,2));
     }
 
-    public void sendContactRequest(String to,String url){
-        serverEndPoint.sendMessage(new MessageRequest(to,
+    public String sendContactRequest(String to,String url){
+        return serverEndPoint.sendMessage(new MessageRequest(to,
                 FirebaseAuth.getInstance().getCurrentUser().getUid(),url,3));
     }
 

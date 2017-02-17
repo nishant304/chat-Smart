@@ -12,7 +12,7 @@ import com.smart.rchat.smart.models.MessageRequest;
 
 public interface IServerEndPoint {
 
-    void sendMessage(MessageRequest messageRequest);
+    String sendMessage(MessageRequest messageRequest);
 
     void createUser(String email,String password,ResponseListener responseListener);
 

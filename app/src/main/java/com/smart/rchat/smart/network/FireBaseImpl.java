@@ -43,10 +43,11 @@ import java.util.UUID;
 public class FireBaseImpl implements IServerEndPoint {
 
     @Override
-    public void sendMessage(MessageRequest messageRequest) {
-        FirebaseDatabase.getInstance().getReference().child("/Messages").push().
-                setValue(AppUtil.getMessageRequest(messageRequest.getTo(),
-                        messageRequest.getMessage(), messageRequest.getType()));
+    public String sendMessage(MessageRequest messageRequest) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("/Messages").push();
+        ref.setValue(AppUtil.getMessageRequest(messageRequest.getTo(),
+                messageRequest.getMessage(), messageRequest.getType()));
+        return ref.getKey();
     }
 
     @Override
@@ -155,7 +156,7 @@ public class FireBaseImpl implements IServerEndPoint {
         if (bitmap == null) {
             try {
                 handleCreateGroupRequest(groupName, "", userIDs, responseListener);
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             return;
@@ -168,7 +169,7 @@ public class FireBaseImpl implements IServerEndPoint {
             public void onSuccess(JSONObject jsonObject) {
                 try {
                     handleCreateGroupRequest(groupName, fileUrl, userIDs, responseListener);
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
             }
@@ -184,95 +185,94 @@ public class FireBaseImpl implements IServerEndPoint {
     private void handleCreateGroupRequest(final String groupName, final String fileUrl, final String[] userIDs,
                                           final ResponseListener responseListener) throws Exception {
 
-        final ArrayList<String> list= new ArrayList<>();
-        for(String us :userIDs){
+        final ArrayList<String> list = new ArrayList<>();
+        for (String us : userIDs) {
             list.add(us);
         }
         list.add(AppUtil.getUserId());
 
-        final HashMap<String,Object> jsonObject = new HashMap<>();
+        final HashMap<String, Object> jsonObject = new HashMap<>();
         jsonObject.put("name", groupName);
         jsonObject.put("url", fileUrl);
         jsonObject.put("members", list);
 
-        DatabaseReference newRef=  FirebaseDatabase.getInstance().getReference("/Group").push();
+        DatabaseReference newRef = FirebaseDatabase.getInstance().getReference("/Group").push();
         final String key = newRef.getKey();
         newRef.setValue(jsonObject).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                 if(task.isSuccessful()){
-                     //Fixme if flow breaks
-                     FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
-                             getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-                         @Override
-                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            HashMap<String,Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                             ArrayList<String> list = (ArrayList<String>) map.get("groups");
-                             if(list == null){
-                                 list = new ArrayList<String>();
-                             }
-                             list.add(key);
-                             map.put("groups",list);
-                             dataSnapshot.getRef().removeEventListener(this);
-                             dataSnapshot.getRef().setValue(map);
+                if (task.isSuccessful()) {
+                    //Fixme if flow breaks
+                    FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
+                            getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                            ArrayList<String> list = (ArrayList<String>) map.get("groups");
+                            if (list == null) {
+                                list = new ArrayList<String>();
+                            }
+                            list.add(key);
+                            map.put("groups", list);
+                            dataSnapshot.getRef().removeEventListener(this);
+                            dataSnapshot.getRef().setValue(map);
+                        }
 
-                         }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                         @Override
-                         public void onCancelled(DatabaseError databaseError) {
-
-                         }
-                     });
+                        }
+                    });
 
 
-                     try {
-                         JSONArray js1 = new JSONArray();
-                         for(String ss:list){
-                             js1.put(ss);
-                         }
-                         jsonObject.put("groupId", key);
-                         JSONObject js = new JSONObject();
-                         js.put("groupId",key);
-                         js.put("url",fileUrl);
-                         js.put("name",groupName);
-                         js.put("members",js1);
-                         responseListener.onSuccess(js);
-                         notifyMembers(userIDs,js);
-                     }catch (Exception e){
+                    try {
+                        JSONArray js1 = new JSONArray();
+                        for (String ss : list) {
+                            js1.put(ss);
+                        }
+                        jsonObject.put("groupId", key);
+                        JSONObject js = new JSONObject();
+                        js.put("groupId", key);
+                        js.put("url", fileUrl);
+                        js.put("name", groupName);
+                        js.put("members", js1);
+                        responseListener.onSuccess(js);
+                        notifyMembers(list, js);
+                    } catch (Exception e) {
 
-                     }
-                 }else{
-                     responseListener.onError(task.getException());
-                 }
+                    }
+                } else {
+                    responseListener.onError(task.getException());
+                }
             }
         });
     }
 
-    private void notifyMembers(String [] members,JSONObject jsonObject){
-        for(String member:members){
-            sendMessage(new MessageRequest(member,FirebaseAuth.getInstance().getCurrentUser().getUid(),
+    private void notifyMembers(ArrayList<String> members, JSONObject jsonObject) {
+        for (String member : members) {
+            sendMessage(new MessageRequest(member, FirebaseAuth.getInstance().getCurrentUser().getUid(),
                     jsonObject.toString(), 4));
         }
     }
 
     @Override
-    public void loadBitMap(final Context context,String userId, final ImageView imageView,final int type) {
-        FirebaseDatabase.getInstance().getReference().child(type==1?"Users":"Group").child(userId).addValueEventListener(
+    public void loadBitMap(final Context context, String userId, final ImageView imageView, final int type) {
+        FirebaseDatabase.getInstance().getReference().child(type == 1 ? "Users" : "Group").child(userId).addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         dataSnapshot.getRef().removeEventListener(this);
-                        HashMap<String,Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                        if(map == null){
-                            return ;
+                        HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                        if (map == null) {
+                            return;
                         }
-                        String url = (String) map.get(type==1?"profilePic":"url");
+                        String url = (String) map.get(type == 1 ? "profilePic" : "url");
 
-                        if(url == null){
+                        if (url == null) {
                             imageView.setImageDrawable(context.getDrawable(R.drawable.profile));
                             return;
                         }
-                        if(url.equals("")){
+                        if (url.equals("")) {
                             imageView.setImageDrawable(context.getDrawable(R.drawable.profile));
                             return;
                         }

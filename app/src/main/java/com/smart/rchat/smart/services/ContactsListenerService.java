@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -49,26 +50,25 @@ import java.util.regex.Pattern;
 public class ContactsListenerService extends Service {
 
     private IActivityCallBack iActivityCallBack;
+
     private HashMap<String, String> idToName = new HashMap<>();
+
     private HashMap<String, Boolean> groupId = new HashMap<>();
-
-    private  String key;
-
 
     private boolean stopTask = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        getApplicationContext().getContentResolver().
-                registerContentObserver(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, false, new ContactsObserver());
+        getApplicationContext().getContentResolver().registerContentObserver
+                (ContactsContract.CommonDataKinds.Phone.CONTENT_URI, false, new ContactsObserver());
         stopTask = false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         FirebaseApp.initializeApp(this);
+        groupId = new HashMap<>();
         updateDb();
         if(intent != null) { // hack for duplicate messages on service restart
             listenForMessages(AppUtil.getUserId());
@@ -170,7 +170,6 @@ public class ContactsListenerService extends Service {
         super.onTaskRemoved(rootIntent);
     }
 
-
     private void listenForMessages(final String userId) {
 
         if (userId == null) {
@@ -181,11 +180,6 @@ public class ContactsListenerService extends Service {
                 .equalTo(userId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String ss) {
-                if(ss!=null && ss.equals(key)){
-                   // return;
-                }
-                Log.d("nishant",""+ss);
-                key = ss;
 
                 HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
                 if (hm == null) {
@@ -196,16 +190,17 @@ public class ContactsListenerService extends Service {
                         handleGroupRequest(hm);
                         return;
                     }
+                    Log.d("nishant",""+hm.get("message").toString() + " from " + hm.get("from").toString());
                     ContentValues cv = new ContentValues();
                     cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
                     cv.put(RChatContract.MESSAGE_TABLE.type, type);
                     cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
                     cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
                     cv.put(RChatContract.MESSAGE_TABLE.to, userId);
-                    //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
-                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
+                    cv.put(RChatContract.MESSAGE_TABLE.msg_id, dataSnapshot.getKey());
+                    Uri uri = getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
                     try {
-                        if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
+                        if (uri != null && iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
                             createNotification(hm.get("from").toString(), hm.get("message").toString(),false);
                         }
                     } catch (RemoteException e) {
@@ -235,50 +230,6 @@ public class ContactsListenerService extends Service {
             }
         }) ;
 
-
-
-/*
-        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to")
-                .equalTo(userId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                if (map == null) {
-                    return;
-                }
-                Set<String> set = map.keySet();
-                for (String s : set) {
-                    HashMap<String, Object> hm = (HashMap<String, Object>) map.get(s);
-                    int type = Integer.valueOf(hm.get("type").toString());
-                    if (type == 4) {
-                        handleGroupRequest(hm);
-                        return;
-                    }
-                    ContentValues cv = new ContentValues();
-                    cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
-                    cv.put(RChatContract.MESSAGE_TABLE.type, type);
-                    cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
-                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                    cv.put(RChatContract.MESSAGE_TABLE.to, userId);
-                    //cv.put(RChatContract.MESSAGE_TABLE.message_id, s); //Fixme
-                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
-                    try {
-                        if (iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
-                            createNotification(hm.get("from").toString(), hm.get("message").toString(),false);
-                        }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-*/
     }
 
     private void listenForGroupMessages() {
@@ -355,6 +306,9 @@ public class ContactsListenerService extends Service {
                         if (list == null) {
                             list = new ArrayList<String>();
                         }
+                        if(itemExists(list,jsonObject.getString("groupId"))){
+                            return;
+                        }
                         list.add(jsonObject.getString("groupId"));
                         map.put("groups", list);
                         dataSnapshot.getRef().removeEventListener(this);
@@ -384,6 +338,14 @@ public class ContactsListenerService extends Service {
         }
     }
 
+    private boolean itemExists(ArrayList<String> list,String item){
+        for(String items:list){
+            if(items.equals(item)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -402,17 +364,7 @@ public class ContactsListenerService extends Service {
             FirebaseAuth.getInstance().signOut();
             stopTask = true;
             stopSelf();
-            stopService();
-            //handler.sendMessageDelayed(null,1000);
-        }
-    };
-
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-
-            Intent in = new Intent(ContactsListenerService.this,ContactsListenerService.class);
-            stopService(in);
+            stopService(); //rec stack overflow, fix problems I dnt know
         }
     };
 

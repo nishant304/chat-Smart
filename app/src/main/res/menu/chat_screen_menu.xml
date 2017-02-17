@@ -10,7 +10,7 @@
     <item
         android:id="@+id/action_send_contact"
         android:icon="@drawable/zzz_content_save"
-        android:title="attchment"
+        android:title="send contact"
         android:showAsAction="always" />
 
 </menu>

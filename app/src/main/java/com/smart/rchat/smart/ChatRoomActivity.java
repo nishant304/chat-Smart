@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheFactory;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,6 +36,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.smart.rchat.smart.adapter.ChatRoomAdapter;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.interfaces.ResponseListener;
+import com.smart.rchat.smart.network.NetworkClient;
 import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 import com.vstechlab.easyfonts.EasyFonts;
@@ -174,9 +177,9 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         }
 
         String message = edMessageBox.getText().toString();
+        String key = getNetworkClient().sendMessage(friendUserId,message);
         getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,AppUtil.
-                getCVforMessafRequest(friendUserId,message,1));
-        getNetworkClient().sendMessage(friendUserId,message);
+                getCVforMessafRequest(friendUserId,message,1,key));
         edMessageBox.getText().clear();
     }
 
@@ -184,6 +187,7 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         Intent intent = new Intent(this,ProfileActivity.class);
         intent.putExtra("id",friendUserId);
         intent.putExtra("type",type);
+        intent.putExtra("name",name);
         startActivity(intent);
     }
 
@@ -208,8 +212,19 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this,RChatContract.MESSAGE_TABLE.CONTENT_URI,null, RChatContract.MESSAGE_TABLE.from
-             +" =? OR "+ RChatContract.MESSAGE_TABLE.to + " =? ",new String[]{friendUserId,friendUserId},null);
+
+        if(type == 1){
+
+            return new CursorLoader(this,RChatContract.MESSAGE_TABLE.CONTENT_URI,null,
+                    RChatContract.MESSAGE_TABLE.from +" =? AND "+ RChatContract.MESSAGE_TABLE.to + " =? OR "+
+                            RChatContract.MESSAGE_TABLE.from +" =? AND "+ RChatContract.MESSAGE_TABLE.to + " =? ",
+                    new String[]{friendUserId,AppUtil.getUserId(),AppUtil.getUserId(),friendUserId},null);
+        }
+
+        return new CursorLoader(this,RChatContract.MESSAGE_TABLE.CONTENT_URI,null,
+                RChatContract.MESSAGE_TABLE.from + " =? OR "+
+                         RChatContract.MESSAGE_TABLE.to + " =? ",
+                new String[]{friendUserId,friendUserId},null);
     }
 
     @Override
@@ -234,28 +249,54 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
         if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            String fileUrl = "images/" + UUID.randomUUID()+".png";
+           final String fileUrl = "images/" + UUID.randomUUID()+".png";
             AppData.getInstance().getLruCache().put(fileUrl,imageBitmap);
-            ContentValues cv = new ContentValues();
-            cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
-            cv.put(RChatContract.MESSAGE_TABLE.message,fileUrl);
-            cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
-            cv.put(RChatContract.MESSAGE_TABLE.from,currUser.getUid());
-            cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_IMAGE);
-            getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
+
+            NetworkClient.getInstance().uploadBitMap(fileUrl, new ResponseListener() {
+                @Override
+                public void onSuccess(JSONObject jsonObject) {
+                    String key = NetworkClient.getInstance().sendImageRequest(friendUserId,fileUrl);
+                    ContentValues cv = new ContentValues();
+                    cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
+                    cv.put(RChatContract.MESSAGE_TABLE.message,fileUrl);
+                    cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
+                    cv.put(RChatContract.MESSAGE_TABLE.from,currUser.getUid());
+                    cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_IMAGE);
+                    cv.put(RChatContract.MESSAGE_TABLE.msg_id,key);
+                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
+                }
+
+                @Override
+                public void onError(Exception error) {
+
+                }
+            });
         }
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = AppUtil.getBitmapFromUri(data.getData(),this);
-            String fileUrl = "images/" + UUID.randomUUID()+".png";
+            final String fileUrl = "images/" + UUID.randomUUID()+".png";
             AppData.getInstance().getLruCache().put(fileUrl,imageBitmap);
-            ContentValues cv = new ContentValues();
-            cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
-            cv.put(RChatContract.MESSAGE_TABLE.message,fileUrl);
-            cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
-            cv.put(RChatContract.MESSAGE_TABLE.from,currUser.getUid());
-            cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_IMAGE);
-            getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
+
+            NetworkClient.getInstance().uploadBitMap(fileUrl, new ResponseListener() {
+                @Override
+                public void onSuccess(JSONObject jsonObject) {
+                    String key = NetworkClient.getInstance().sendImageRequest(friendUserId,fileUrl);
+                    ContentValues cv = new ContentValues();
+                    cv.put(RChatContract.MESSAGE_TABLE.to,friendUserId);
+                    cv.put(RChatContract.MESSAGE_TABLE.message,fileUrl);
+                    cv.put(RChatContract.MESSAGE_TABLE.time,System.currentTimeMillis());
+                    cv.put(RChatContract.MESSAGE_TABLE.from,currUser.getUid());
+                    cv.put(RChatContract.MESSAGE_TABLE.type,TYPE_IMAGE);
+                    cv.put(RChatContract.MESSAGE_TABLE.msg_id,key);
+                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
+                }
+
+                @Override
+                public void onError(Exception error) {
+
+                }
+            });
         }
 
         if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
@@ -277,9 +318,10 @@ public class ChatRoomActivity extends  BaseActivity implements View.OnClickListe
                             message.put("number", number);
                             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                             message.put("name", name);
+
+                            String key = getNetworkClient().sendContactRequest(friendUserId, message.toString());
                             getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, AppUtil.
-                                    getCVforMessafRequest(friendUserId, message.toString(), 3));
-                            getNetworkClient().sendContactRequest(friendUserId, message.toString());
+                                    getCVforMessafRequest(friendUserId, message.toString(), 3,key));
                         }
                         cursor.close();
                     }catch(Exception e){

@@ -38,12 +38,14 @@ public class ProfileActivity extends BaseActivity  {
         setContentView(R.layout.activity_user_profile);
         String id = getIntent().getStringExtra("id");
         int type =  getIntent().getIntExtra("type",0);
+        String name = getIntent().getStringExtra("name");
         if(type == 2){
             createUserList(id);
         }
         getNetworkClient().loadBitMap(this,id,ivProfile,type);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(name);
     }
 
     private  void createUserList(String groupId){

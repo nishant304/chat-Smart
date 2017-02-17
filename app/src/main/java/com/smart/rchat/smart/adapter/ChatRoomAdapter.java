@@ -130,31 +130,11 @@ public class ChatRoomAdapter extends CursorAdapter {
                 final ImageView rightImageView = (ImageView) view.findViewById(R.id.ivOutImg);
                 final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.pbRight);
                 final String url = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
-                Bitmap bitmap = AppData.getInstance().getLruCache().get(url);
-                if(bitmap!=null){
-                    rightImageView.setImageBitmap(bitmap);
-                }
 
-                //rightImageView.setImageBitmap(bitmap);
-                NetworkClient.getInstance().uploadBitMap(url, new ResponseListener() {
-                    @Override
-                    public void onSuccess(JSONObject jsonObject) {
-                        Glide.with(context).using(new FirebaseImageLoader())
-                                .load(FirebaseStorage.getInstance().getReference(url))
-                                .into(rightImageView);
-                        progressBar.setVisibility(View.GONE);
-                        NetworkClient.getInstance().sendImageRequest(friendUserId,url);
-                    }
+                Glide.with(context).using(new FirebaseImageLoader())
+                        .load(FirebaseStorage.getInstance().getReference(url))
+                        .into(rightImageView);
 
-                    @Override
-                    public void onError(Exception error) {
-
-                        Glide.with(context).using(new FirebaseImageLoader())
-                                .load(FirebaseStorage.getInstance().getReference(url))
-                                .into(rightImageView);
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
             }
         }else{
             View inContactLayout = view.findViewById(R.id.inContactLayout);

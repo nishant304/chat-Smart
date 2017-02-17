@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.smart.rchat.smart.adapter.GroupItemSelectAdapter;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.interfaces.ResponseListener;
@@ -133,4 +134,5 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
         setResult(RESULT_CANCELED);
         finish();
     }
+
 }

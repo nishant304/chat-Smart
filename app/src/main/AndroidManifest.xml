@@ -25,6 +25,7 @@
         <activity android:name=".LoginActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".HomeActivity"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
         <activity android:name=".PhoneVerifyActivity"
             android:screenOrientation="portrait"/>
@@ -51,7 +52,10 @@
             />
         <activity android:name=".ForgotPasswordActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".ProfileActivity" />
+        <activity android:name=".ProfileActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".ChatRoomActivity"
+            />
 
         <provider
             android:name=".database.RChatContentProvider"

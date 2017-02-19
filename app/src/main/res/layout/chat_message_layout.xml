@@ -12,11 +12,23 @@
         android:layout_margin="10dp"
         android:background="@drawable/grey_bubble">
 
+        <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone"
+            android:textColor="@android:color/black"
+            android:layout_margin="5dp"
+            android:id="@+id/tvGrpMember" />
+
         <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
             android:id="@+id/tvLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="3dp"
+            android:layout_below="@+id/tvGrpMember"
             android:text="TextView"
             android:textColor="@android:color/black"
             android:textSize="20sp"

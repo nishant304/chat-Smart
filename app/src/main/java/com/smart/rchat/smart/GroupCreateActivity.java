@@ -96,6 +96,8 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
                     Intent intent = new Intent(GroupCreateActivity.this, ChatRoomActivity.class);
                     intent.putExtra("friend_user_id",jsonObject.getString("groupId"));
                     intent.putExtra("name",groupName);
+                    intent.putExtra("type",2);
+                    intent.putExtra("members",jsonObject.getJSONArray("members").toString());
                     setResult(RESULT_OK,intent);
                     //startActivity(intent);
                     finish();

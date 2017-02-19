@@ -70,7 +70,7 @@ public class ContactsListenerService extends Service {
         FirebaseApp.initializeApp(this);
         groupId = new HashMap<>();
         updateDb();
-        if(intent != null) { // hack for duplicate messages on service restart
+        if (intent != null) { // hack for duplicate messages on service restart
             listenForMessages(AppUtil.getUserId());
             listenForGroupMessages();
         }
@@ -118,7 +118,7 @@ public class ContactsListenerService extends Service {
                     }
                 }
 
-                if (userID != null&& !userID.equals(AppUtil.getUserId()) ) {
+                if (userID != null && !userID.equals(AppUtil.getUserId())) {
                     final String finalUserID = userID;
 
                     FirebaseDatabase.getInstance().getReference().child("/Users").child(userID).addValueEventListener(new ValueEventListener() {
@@ -185,27 +185,27 @@ public class ContactsListenerService extends Service {
                 if (hm == null) {
                     return;
                 }
-                    int type = Integer.valueOf(hm.get("type").toString());
-                    if (type == 4) {
-                        handleGroupRequest(hm);
-                        return;
+                int type = Integer.valueOf(hm.get("type").toString());
+                if (type == 4) {
+                    handleGroupRequest(hm);
+                    return;
+                }
+                Log.d("nishant", "" + hm.get("message").toString() + " from " + hm.get("from").toString());
+                ContentValues cv = new ContentValues();
+                cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
+                cv.put(RChatContract.MESSAGE_TABLE.type, type);
+                cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
+                cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
+                cv.put(RChatContract.MESSAGE_TABLE.to, userId);
+                cv.put(RChatContract.MESSAGE_TABLE.msg_id, dataSnapshot.getKey());
+                Uri uri = getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
+                try {
+                    if (uri != null && iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
+                        createNotification(hm.get("from").toString(), hm.get("message").toString(), false);
                     }
-                    Log.d("nishant",""+hm.get("message").toString() + " from " + hm.get("from").toString());
-                    ContentValues cv = new ContentValues();
-                    cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
-                    cv.put(RChatContract.MESSAGE_TABLE.type, type);
-                    cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
-                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                    cv.put(RChatContract.MESSAGE_TABLE.to, userId);
-                    cv.put(RChatContract.MESSAGE_TABLE.msg_id, dataSnapshot.getKey());
-                    Uri uri = getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
-                    try {
-                        if (uri != null && iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
-                            createNotification(hm.get("from").toString(), hm.get("message").toString(),false);
-                        }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
 
             }
 
@@ -228,13 +228,13 @@ public class ContactsListenerService extends Service {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        }) ;
+        });
 
     }
 
     private void listenForGroupMessages() {
         String userId = AppUtil.getUserId();
-        if(userId == null){
+        if (userId == null) {
             return;
         }
         FirebaseDatabase.getInstance().getReference().child("Users").child(userId).addValueEventListener(new ValueEventListener() {
@@ -259,7 +259,7 @@ public class ContactsListenerService extends Service {
         });
     }
 
-    private void createNotification(String friendUserId, String message,boolean isGroupReq) {
+    private void createNotification(String friendUserId, String message, boolean isGroupReq) {
         Intent resultIntent = new Intent(this, ChatRoomActivity.class);
         resultIntent.putExtra("friend_user_id", friendUserId);
         resultIntent.putExtra("name", idToName.get(friendUserId) != null ? idToName.get(friendUserId) : "");
@@ -284,10 +284,11 @@ public class ContactsListenerService extends Service {
 
         try {
             final JSONObject jsonObject = new JSONObject(message);
-            if(groupId.get(jsonObject.getString("groupId")) != null){  //hack ,Fix this
+            if (groupId.get(jsonObject.getString("groupId")) != null) {  //hack ,Fix this
                 return;
             }
-            groupId.put(jsonObject.getString("groupId"),true);
+
+            groupId.put(jsonObject.getString("groupId"), true);
             ContentValues contentValues = new ContentValues();
             contentValues.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
             contentValues.put(RChatContract.USER_TABLE.USER_NAME, jsonObject.getString("name"));
@@ -295,7 +296,7 @@ public class ContactsListenerService extends Service {
             contentValues.put(RChatContract.USER_TABLE.memebers, jsonObject.getJSONArray("members").toString());
             contentValues.put(RChatContract.USER_TABLE.type, 2);
             getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
-            createNotification(jsonObject.getString("groupId"), "new group request",true);
+            createNotification(jsonObject.getString("groupId"), "new group request", true);
             FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
                     getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -306,7 +307,7 @@ public class ContactsListenerService extends Service {
                         if (list == null) {
                             list = new ArrayList<String>();
                         }
-                        if(itemExists(list,jsonObject.getString("groupId"))){
+                        if (itemExists(list, jsonObject.getString("groupId"))) {
                             return;
                         }
                         list.add(jsonObject.getString("groupId"));
@@ -317,12 +318,12 @@ public class ContactsListenerService extends Service {
                             public void onComplete(@NonNull Task<Void> task) {
                                 try {
                                     listenForMessages(jsonObject.getString("groupId"));
-                                }catch (Exception e){
+                                } catch (Exception e) {
 
                                 }
                             }
                         });
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
                 }
@@ -338,9 +339,9 @@ public class ContactsListenerService extends Service {
         }
     }
 
-    private boolean itemExists(ArrayList<String> list,String item){
-        for(String items:list){
-            if(items.equals(item)){
+    private boolean itemExists(ArrayList<String> list, String item) {
+        for (String items : list) {
+            if (items.equals(item)) {
                 return true;
             }
         }
@@ -368,9 +369,4 @@ public class ContactsListenerService extends Service {
         }
     };
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
-    }
 }

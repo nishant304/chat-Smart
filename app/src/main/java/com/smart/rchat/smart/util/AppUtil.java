@@ -22,6 +22,9 @@ import com.google.firebase.storage.UploadTask;
 import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.database.RChatContract;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -98,17 +101,20 @@ public class AppUtil {
         return firebaseUser.getUid();
     }
 
-    public static   View getViewByPosition(int pos, ListView listView) {
-        final int firstListItemPosition = listView.getFirstVisiblePosition();
-        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-
-        if (pos < firstListItemPosition || pos > lastListItemPosition) {
-            return listView.getAdapter().getView(pos, null, listView);
-        } else {
-            final int childIndex = pos - firstListItemPosition;
-            return listView.getChildAt(childIndex);
+    public  static  String getSelection(JSONArray jsonArray) throws JSONException{
+        if(jsonArray.length() == 0){
+            return "";
         }
-    }
+        StringBuilder stringBuilder = new StringBuilder();
 
+        for(int i=0;i<jsonArray.length();i++){
+            stringBuilder.append(RChatContract.USER_TABLE.USER_ID);
+            stringBuilder.append(" ='"+jsonArray.getString(i)+"' ");
+            if(jsonArray.length() != 1 && i != jsonArray.length()-1){
+                stringBuilder.append("  OR  ");
+            }
+        }
+        return stringBuilder.toString();
+    }
 
 }

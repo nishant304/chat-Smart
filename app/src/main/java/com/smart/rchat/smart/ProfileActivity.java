@@ -12,6 +12,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.adapter.GroupMemberAdapter;
+import com.smart.rchat.smart.models.User;
+import com.smart.rchat.smart.util.AppData;
 
 import java.util.ArrayList;
 
@@ -49,19 +51,8 @@ public class ProfileActivity extends BaseActivity  {
     }
 
     private  void createUserList(String groupId){
-        FirebaseDatabase.getInstance().getReference().child("Group").child(groupId).child("members").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> users = (ArrayList<String>) dataSnapshot.getValue();
-                GroupMemberAdapter gr = new GroupMemberAdapter(ProfileActivity.this,users);
-                recyclerView.setAdapter(gr);
-                recyclerView.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        GroupMemberAdapter gr = new GroupMemberAdapter(ProfileActivity.this,(ArrayList<User>) AppData.getInstance().getDumpObject());
+        recyclerView.setAdapter(gr);
+        recyclerView.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
     }
 }

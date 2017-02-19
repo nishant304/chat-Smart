@@ -14,11 +14,11 @@ public class User {
 
     private String name;
 
-    public User(String userId, String profileUrl, String phone, String status) {
+    public User(String userId, String profileUrl, String phone, String name) {
         this.phone = phone;
         this.userId = userId;
         this.profileUrl = profileUrl;
-        this.name = status;
+        this.name = name;
     }
 
     public String getUserId() {

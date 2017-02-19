@@ -38,7 +38,7 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
 
     private void startService() {
         Intent intent = new Intent(HomeActivity.this, ContactsListenerService.class);
-        //startService(intent);
+        startService(intent);
         bindService(intent,mConnection,BIND_EXTERNAL_SERVICE);
     }
 

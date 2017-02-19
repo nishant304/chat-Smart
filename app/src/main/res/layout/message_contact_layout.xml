@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:background="@color/colorButtonNormal"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="175dp"
+    android:background="@android:color/white"
+    android:layout_height="100dp">
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:visibility="visible"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+        android:textColor="@android:color/black"
+        android:layout_margin="5dp"
+        android:id="@+id/tvGrpMember" />
 
     <TextView
         android:text="TextView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:gravity="center"
-        android:layout_weight="1"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_weight="2"
+        android:textColor="@android:color/black"
         android:id="@+id/tvContactName" />
 
     <TextView
         android:text="TextView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:layout_weight="3"
         android:gravity="center"
+        android:textColor="@android:color/black"
         android:id="@+id/tvContactNumber" />
 </LinearLayout>

@@ -92,8 +92,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     showDialog();
-                    Intent intent = new Intent(LoginActivity.this, ContactsListenerService.class);
-                    startService(intent);
                     sendHome();
                 }
             }

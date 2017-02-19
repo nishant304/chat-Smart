@@ -51,7 +51,9 @@
             android:parentActivityName=".HomeActivity"
             />
         <activity android:name=".ForgotPasswordActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".LoginActivity"
+            />
         <activity android:name=".ProfileActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".ChatRoomActivity"

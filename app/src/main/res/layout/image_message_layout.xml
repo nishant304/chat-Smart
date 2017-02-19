@@ -9,15 +9,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:visibility="gone"
+        android:visibility="visible"
+        android:background="@android:color/white"
         android:layout_margin="10dp">
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:textColor="@android:color/black"
+            android:visibility="gone"
+            android:layout_margin="5dp"
+            android:id="@+id/tvGrpMember" />
 
         <ImageView
             android:id="@+id/ivInImg"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/rlLeft"
+            android:layout_below="@+id/tvGrpMember"
             android:layout_margin="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/rchatlogo"
@@ -60,6 +72,5 @@
             android:layout_centerInParent="true"
             android:visibility="visible" />
     </RelativeLayout>
-
 
 </RelativeLayout>

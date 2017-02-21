@@ -47,19 +47,20 @@
 
     <RelativeLayout
         android:id="@+id/rlImgRight"
-        android:layout_width="wrap_content"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:visibility="gone"
+        android:visibility="visible"
         android:background="@android:color/white"
-        android:layout_margin="10dp">
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
 
         <ImageView
             android:id="@+id/ivOutImg"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/rlLeft"
             android:layout_margin="10dp"
             android:scaleType="fitXY"
             android:src="@drawable/rchatlogo"

@@ -44,6 +44,7 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.slide_in,R.anim.slide_out);
         getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         getListView().setOnItemClickListener(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -100,8 +101,6 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
         }
 
         AppData.getInstance().dumpObject(userList);
-
-
         Intent intent = new Intent(this,GroupCreateActivity.class);
         intent.putExtra("users",users);
         startActivityForResult(intent,1);
@@ -119,6 +118,6 @@ public class GroupItemSelectActivity extends ContactActivity implements View.OnC
             startActivity(data);
             finish();
         }
-
     }
+
 }

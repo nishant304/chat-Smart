@@ -26,9 +26,9 @@ public class SplashActivity extends AppCompatActivity {
                         LoginActivity.class:HomeActivity.class);
                 startActivity(intent);
                 finish();
+                overridePendingTransition(R.anim.slide_in,R.anim.slide_out);
             }
         },3000);
-
 
     }
 }

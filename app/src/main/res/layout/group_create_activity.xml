@@ -24,7 +24,7 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/linearLayout"
         android:background="@color/colorPrimary"
-        app:layout_heightPercent="70%"
+        app:layout_heightPercent="60%"
         android:layout_alignParentBottom="true" />
 
     <android.support.percent.PercentRelativeLayout
@@ -33,27 +33,28 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        app:layout_heightPercent="25%">
+        app:layout_heightPercent="35%">
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            app:layout_marginTopPercent="15%"
             android:text="Please enter a group name"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-            android:textSize="20sp" />
+            android:textSize="22sp" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ivGroupImage"
-            android:layout_height="match_parent"
+            android:layout_height="56dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="10dp"
             android:src="@drawable/zzz_camera"
-            app:civ_fill_color="@color/wallet_holo_blue_light"
-            app:layout_widthPercent="20%" />
+            app:civ_fill_color="@color/colorAccent"
+            app:layout_widthPercent="17%" />
 
         <ImageView
             android:id="@+id/smiley"
@@ -75,6 +76,8 @@
             android:layout_toEndOf="@+id/ivGroupImage"
             android:layout_toRightOf="@+id/ivGroupImage"
             android:ems="14"
+            android:imeOptions="actionDone"
+            android:maxLines="1"
             android:hint="group name"
             android:paddingLeft="10dp"
             android:textColor="@android:color/black"

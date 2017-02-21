@@ -23,7 +23,7 @@ import com.smart.rchat.smart.util.AppUtil;
  * Created by nishant on 1/23/2017.
  */
 
-public class HomeActivity extends ContactActivity implements View.OnClickListener {
+public class HomeActivity extends ContactActivity {
 
     IContactListener listener;
 
@@ -108,17 +108,6 @@ public class HomeActivity extends ContactActivity implements View.OnClickListene
         Intent intent1 = new Intent(this,LoginActivity.class);
         startActivity(intent1);
         finish();
-    }
-
-    @Override
-    public void onClick(View v) {
-        ContactsAdapter.NameIdPair nameIdPair= (ContactsAdapter.NameIdPair) v.getTag();
-        id = nameIdPair.userId;
-        Intent intent = new Intent(HomeActivity.this,ChatRoomActivity.class);
-        intent.putExtra("friend_user_id",id);
-        intent.putExtra("name",nameIdPair.name);
-        intent.putExtra("type",nameIdPair.type);
-        startActivity(intent);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

@@ -12,9 +12,9 @@
 
     <ListView
         android:id="@+id/lvContactcreen"
-        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:listSelector="@drawable/list_item_selector"
+        android:divider="@color/colorPrimary"
         android:layout_height="match_parent" />
 
     <android.support.design.widget.FloatingActionButton

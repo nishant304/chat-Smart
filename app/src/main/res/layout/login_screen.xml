@@ -26,6 +26,7 @@
         android:layout_marginTop="50dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:imeOptions="actionNext"
         android:ems="10"
         android:inputType="textEmailAddress" />
 

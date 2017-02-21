@@ -35,12 +35,10 @@ public class ContactsAdapter extends CursorAdapter {
     private final Cursor cursor;
     private final LayoutInflater inflater;
 
-
     public ContactsAdapter(Context context, Cursor cursor) {
         super(context,cursor,false);
         this.cursor = cursor;
         this.inflater = LayoutInflater.from(context);
-
     }
 
     @Override
@@ -59,38 +57,21 @@ public class ContactsAdapter extends CursorAdapter {
 
         TextView  textview = (TextView) itemView.findViewById(R.id.tvNumber);
         TextView  tvName = (TextView) itemView.findViewById(R.id.tvName);
-        TextView  tvInvite = (TextView) itemView.findViewById(R.id.tvInvite);
+
         final ImageView imv = (ImageView) itemView.findViewById(R.id.profile_image);
         NetworkClient.getInstance().loadBitMap(context, userId,imv,type);
-
-        itemView.setTag(new NameIdPair(name,userId,type));
 
         textview.setTypeface(EasyFonts.robotoBlack(context));
         tvName.setTypeface(EasyFonts.robotoBold(context));
 
         textview.setText(cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE)));
-        tvInvite.setVisibility(cursor.getString(
-                cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID)) == null ? View.VISIBLE : View.GONE);
         tvName.setText(name);
-
     }
 
     @Override
     public int getCount() {
         return cursor == null ? 0 : cursor.getCount();
-    }
-
-    public static  class NameIdPair{
-        public String name;
-        public String userId;
-        public int type;
-
-        NameIdPair(String name,String userId,int type){
-            this.name = name;
-            this.userId = userId;
-            this.type =type;
-        }
     }
 
 }

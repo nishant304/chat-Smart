@@ -9,16 +9,12 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -33,7 +29,11 @@ import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.IActivityCallBack;
 import com.smart.rchat.smart.IContactListener;
 import com.smart.rchat.smart.R;
+import com.smart.rchat.smart.dao.MessageDao;
+import com.smart.rchat.smart.dao.UserDao;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.models.MessageRequest;
+import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppUtil;
 
 import org.json.JSONObject;
@@ -95,9 +95,8 @@ public class ContactsListenerService extends Service {
         List<String> phoneNumbers = new ArrayList<>();
         while (cursor.moveToNext()) {
             String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
             number = number.trim().replace(" ", "").replace("-", "").replace("+", "");
-            if (p.matcher(number).find()) {
+            if(AppUtil.hasSplChars(number)){
                 continue;
             }
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
@@ -124,14 +123,8 @@ public class ContactsListenerService extends Service {
                     FirebaseDatabase.getInstance().getReference().child("/Users").child(userID).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(RChatContract.USER_TABLE.USER_ID, finalUserID);
-                            contentValues.put(RChatContract.USER_TABLE.USER_NAME, name);
-                            contentValues.put(RChatContract.USER_TABLE.PHONE, phoneNo);
-                            contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, "");
-                            contentValues.put(RChatContract.USER_TABLE.type, 1);
-                            getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
+                            User user = new User(finalUserID,"",phoneNo,name);
+                            UserDao.insertValues(getApplicationContext(), user);
                             idToName.put(finalUserID, name);
                         }
 
@@ -155,7 +148,6 @@ public class ContactsListenerService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
 
         if (!stopTask) {
-
             Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
             restartServiceIntent.setPackage(getPackageName());
 
@@ -181,30 +173,23 @@ public class ContactsListenerService extends Service {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String ss) {
 
-                HashMap<String, Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
-                if (hm == null) {
-                    return;
-                }
-                int type = Integer.valueOf(hm.get("type").toString());
+                MessageRequest msMessageRequest = dataSnapshot.getValue(MessageRequest.class);
+                HashMap<String,Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
+                int type = msMessageRequest.getType();
                 if (type == 4) {
                     handleGroupRequest(hm);
                     return;
                 }
-                Log.d("nishant", "" + hm.get("message").toString() + " from " + hm.get("from").toString());
-                ContentValues cv = new ContentValues();
-                cv.put(RChatContract.MESSAGE_TABLE.from, hm.get("from").toString());
-                cv.put(RChatContract.MESSAGE_TABLE.type, type);
-                cv.put(RChatContract.MESSAGE_TABLE.message, hm.get("message").toString());
-                cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                cv.put(RChatContract.MESSAGE_TABLE.to, userId);
-                cv.put(RChatContract.MESSAGE_TABLE.msg_id, dataSnapshot.getKey());
-                Uri uri = getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
+
+                Uri uri = MessageDao.insertValue(ContactsListenerService.this.getApplicationContext(), msMessageRequest,
+                        dataSnapshot.getKey());
                 try {
                     if (uri != null && iActivityCallBack == null || !iActivityCallBack.getFriendIdInChat().equals(hm.get("from").toString())) {
-                        createNotification(hm.get("from").toString(), hm.get("message").toString(), false);
+                        createNotification(msMessageRequest.getFrom(), msMessageRequest.getMessage(),
+                                false, !AppUtil.getUserId().equals(userId),null);
                     }
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+
                 }
 
             }
@@ -259,11 +244,15 @@ public class ContactsListenerService extends Service {
         });
     }
 
-    private void createNotification(String friendUserId, String message, boolean isGroupReq) {
+    private void createNotification(String friendUserId, String message, boolean isGroupReq, boolean toGroup,String members) {
         Intent resultIntent = new Intent(this, ChatRoomActivity.class);
         resultIntent.putExtra("friend_user_id", friendUserId);
         resultIntent.putExtra("name", idToName.get(friendUserId) != null ? idToName.get(friendUserId) : "");
         resultIntent.putExtra("isGroupReq", isGroupReq);
+        resultIntent.putExtra("type", toGroup ? 2 : 1);
+        if(toGroup){
+            resultIntent.putExtra("members",members);
+        }
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -279,9 +268,7 @@ public class ContactsListenerService extends Service {
     }
 
     private void handleGroupRequest(HashMap<String, Object> map) {
-        //Fixme names
         String message = map.get("message").toString();
-
         try {
             final JSONObject jsonObject = new JSONObject(message);
             if (groupId.get(jsonObject.getString("groupId")) != null) {  //hack ,Fix this
@@ -289,14 +276,11 @@ public class ContactsListenerService extends Service {
             }
 
             groupId.put(jsonObject.getString("groupId"), true);
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
-            contentValues.put(RChatContract.USER_TABLE.USER_NAME, jsonObject.getString("name"));
-            contentValues.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
-            contentValues.put(RChatContract.USER_TABLE.memebers, jsonObject.getJSONArray("members").toString());
-            contentValues.put(RChatContract.USER_TABLE.type, 2);
-            getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, contentValues);
-            createNotification(jsonObject.getString("groupId"), "new group request", true);
+            UserDao.insertValues(ContactsListenerService.this.getApplicationContext(), jsonObject.getString("groupId"),
+                    jsonObject.getString("name"), jsonObject.getString("url"),
+                    jsonObject.getJSONArray("members").toString(), 2);
+
+            createNotification(jsonObject.getString("groupId"), "new group request", true, true,jsonObject.getJSONArray("members").toString());
             FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.
                     getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -361,11 +345,10 @@ public class ContactsListenerService extends Service {
 
         @Override
         public void stopService() throws RemoteException {
-
             FirebaseAuth.getInstance().signOut();
             stopTask = true;
             stopSelf();
-            stopService(); //rec stack overflow, fix problems I dnt know
+            System.exit(0);    //Fixme current fix, the problem might be stopTask
         }
     };
 

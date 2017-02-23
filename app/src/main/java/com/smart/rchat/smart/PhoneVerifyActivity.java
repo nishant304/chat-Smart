@@ -25,8 +25,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.database.RChatContract;
-import com.smart.rchat.smart.services.UpdateContactsService;
+import com.smart.rchat.smart.interfaces.ResponseListener;
+import com.smart.rchat.smart.models.User;
+import com.smart.rchat.smart.util.AppUtil;
 
+import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,64 +40,61 @@ import java.util.concurrent.CountDownLatch;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by nishant on 1/25/2017.
  */
 
-public class PhoneVerifyActivity extends BaseActivity implements View.OnClickListener{
+public class PhoneVerifyActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.edPhone)
     public EditText phone;
-
-    @BindView(R.id.btPhoneSubmit)
-    public Button submit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.phone_verify_screen);
-        submit.setOnClickListener(this);
     }
 
-    @Override
+    @OnClick(R.id.btPhoneSubmit)
     public void onClick(View v) {
         if (phone.getText().toString().length() < 8) {
             makeToast("phone number length is less than 8");
             return;
         }
-        final String phoneNo = phone.getText().toString().trim().replace(" ","");
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/Users");
-        final FirebaseUser currUser = FirebaseAuth.getInstance().getCurrentUser();
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("phone", phone.getText().toString());
-        map.put("blockedList", new ArrayList<String>());
-        map.put("typingTo", "");
-        map.put("status", "Online");
-        map.put("profilePic", "");
-        map.put("name",currUser.getDisplayName());
-        ref.child(currUser.getUid()).setValue(map).addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    final DatabaseReference phoneRef = FirebaseDatabase.getInstance().getReference("/Phone");
-                    phoneRef.child(phoneNo).setValue(currUser.getUid()).addOnCompleteListener(PhoneVerifyActivity.this,
-                            new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        makeToast("phone verification complete");
-                                        //FirebaseAuth.getInstance().getCurrentUser().
-                                        Intent intent1 = new Intent(PhoneVerifyActivity.this, HomeActivity.class);
-                                        startActivity(intent1);
-                                        //phoneRef.child(phoneNo);  Fixme
-                                        finish();
-                                    }
-                                }
-                            });
-                }
+
+        final String phoneNo = phone.getText().toString().trim().replace(" ", "");
+        getNetworkClient().updatePhoneNo(phoneNo, new User(AppUtil.getUserId(), "", phoneNo, ""),
+                new UpdateUserResponseListener(this));
+    }
+
+    private static class UpdateUserResponseListener implements ResponseListener {
+
+        private WeakReference<PhoneVerifyActivity> weakReference;
+
+        private UpdateUserResponseListener(PhoneVerifyActivity profileActivity) {
+            weakReference = new WeakReference<PhoneVerifyActivity>(profileActivity);
+        }
+
+        @Override
+        public void onError(Exception error) {
+            final PhoneVerifyActivity profileActivity = (PhoneVerifyActivity) weakReference.get();
+            if (profileActivity == null) {
+                return;
             }
-        });
+            profileActivity.makeToast(error.getMessage());
+        }
+
+        @Override
+        public void onSuccess(JSONObject jsonObject) {
+            final PhoneVerifyActivity profileActivity = (PhoneVerifyActivity) weakReference.get();
+            if (profileActivity == null) {
+                return;
+            }
+            profileActivity.makeToast("phone verification complete");
+            profileActivity.finish();
+        }
     }
 
 }

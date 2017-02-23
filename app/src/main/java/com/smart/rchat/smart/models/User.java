@@ -1,5 +1,7 @@
 package com.smart.rchat.smart.models;
 
+import java.util.ArrayList;
+
 /**
  * Created by nishant on 14.02.17.
  */
@@ -8,17 +10,27 @@ public class User {
 
     private String userId;
 
-    private String profileUrl;
+    private String profilePic;
 
     private String phone;
 
     private String name;
 
+    private String status;
+
+    private String typingTo;
+
+    private ArrayList<String> groups = new ArrayList<>();
+
     public User(String userId, String profileUrl, String phone, String name) {
         this.phone = phone;
         this.userId = userId;
-        this.profileUrl = profileUrl;
+        this.profilePic = profileUrl;
         this.name = name;
+    }
+
+    public User(){
+
     }
 
     public String getUserId() {
@@ -29,12 +41,12 @@ public class User {
         this.userId = userId;
     }
 
-    public String getProfileUrl() {
-        return profileUrl;
+    public String getProfilePic() {
+        return profilePic;
     }
 
-    public void setProfileUrl(String profileUrl) {
-        this.profileUrl = profileUrl;
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
     public String getPhone() {
@@ -53,5 +65,28 @@ public class User {
         this.name = name;
     }
 
+    public ArrayList<String> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(ArrayList<String> groups) {
+        this.groups = groups;
+    }
+
+    public String getTypingTo() {
+        return typingTo;
+    }
+
+    public void setTypingTo(String typingTo) {
+        this.typingTo = typingTo;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
 }

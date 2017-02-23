@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.UploadTask;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.fragments.ImageSelectFragment;
 import com.smart.rchat.smart.util.AppData;
 import com.smart.rchat.smart.util.AppUtil;
 
@@ -37,7 +38,7 @@ import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
  * Created by nishant on 13.02.17.
  */
 
-public class UpdateProfileActivity extends BaseActivity  implements View.OnClickListener{
+public class UpdateProfileActivity extends BaseActivity  implements ImageSelectFragment.BitMapFetchListener{
 
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
@@ -45,12 +46,7 @@ public class UpdateProfileActivity extends BaseActivity  implements View.OnClick
     @BindView(R.id.profile_image)
     public ImageView profileImage;
 
-    @BindView(R.id.ivCamera)
-    public ImageView cameraView;
-
-    private static final int PICK_IMAGE = 1;
-
-    private  static  final  int REQUEST_IMAGE_CAPTURE =2;
+    private ImageSelectFragment imageSelectFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,32 +54,21 @@ public class UpdateProfileActivity extends BaseActivity  implements View.OnClick
         setContentView(R.layout.activity_update_profile);
         String id = getIntent().getStringExtra("id");
         getNetworkClient().loadBitMap(this,id,profileImage,1);
-        cameraView.setOnClickListener(this);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Profile");
     }
 
-    @Override
+    @OnClick(R.id.ivCamera)
     public void onClick(View v) {
-        Intent takePictureIntent = new Intent(ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
+        imageSelectFragment = new ImageSelectFragment();
+        imageSelectFragment.show(getFragmentManager(),ImageSelectFragment.TAG);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-            if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
-                Bundle extras = data.getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                profileImage.setImageBitmap(imageBitmap);
-                updateProfile(imageBitmap);
-            }
-    }
-
-    private void updateProfile(Bitmap imageBitmap){
+    public void onBitMapFetched(Bitmap imageBitmap) {
+        profileImage.setImageBitmap(imageBitmap);
         final String fileUrl = "images/" + UUID.randomUUID()+".png";
         AppUtil.uploadBitmap(fileUrl, imageBitmap, new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -105,7 +90,6 @@ public class UpdateProfileActivity extends BaseActivity  implements View.OnClick
                 });
             }
         });
-
     }
 
 }

@@ -2,6 +2,7 @@ package com.smart.rchat.smart.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,11 +35,15 @@ public class ContactsAdapter extends CursorAdapter {
 
     private final Cursor cursor;
     private final LayoutInflater inflater;
+    private final Typeface black;
+    private final Typeface bold;
 
     public ContactsAdapter(Context context, Cursor cursor) {
         super(context,cursor,false);
         this.cursor = cursor;
         this.inflater = LayoutInflater.from(context);
+        this.black    = EasyFonts.robotoBlack(context);
+        this.bold    = EasyFonts.robotoBold(context);
     }
 
     @Override
@@ -61,8 +66,8 @@ public class ContactsAdapter extends CursorAdapter {
         final ImageView imv = (ImageView) itemView.findViewById(R.id.profile_image);
         NetworkClient.getInstance().loadBitMap(context, userId,imv,type);
 
-        textview.setTypeface(EasyFonts.robotoBlack(context));
-        tvName.setTypeface(EasyFonts.robotoBold(context));
+        textview.setTypeface(this.black);
+        tvName.setTypeface(this.bold);
 
         textview.setText(cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE)));

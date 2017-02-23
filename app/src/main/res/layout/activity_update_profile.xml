@@ -2,38 +2,34 @@
 <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:background="@color/colorAccent"
+    android:layout_height="match_parent">
 
-       android:layout_height="match_parent">
-
-    <include layout="@layout/app_bar"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:alpha="0.5"
+    <include
         android:id="@+id/toolbar"
-        />
+        layout="@layout/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.5" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profile_image"
-        android:layout_centerHorizontal="true"
         android:layout_width="156dp"
         android:layout_height="156dp"
-        app:layout_marginTopPercent="25%"
-        android:alpha="0.5"
-        app:civ_fill_color="@color/wallet_holo_blue_light"
+        android:layout_centerHorizontal="true"
         android:src="@drawable/profile"
-        />
+        app:civ_fill_color="@color/wallet_holo_blue_light"
+        app:layout_marginTopPercent="25%" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/ivCamera"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:alpha="0.5"
-        app:civ_fill_color="@color/wallet_holo_blue_light"
-        android:src="@drawable/zzz_camera"
         android:layout_below="@+id/profile_image"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp" />
+        android:layout_marginTop="40dp"
+        android:alpha="0.5"
+        android:src="@drawable/zzz_camera"
+        app:civ_fill_color="@color/wallet_holo_blue_light" />
 
 
 </android.support.percent.PercentRelativeLayout>

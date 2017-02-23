@@ -1,6 +1,7 @@
 package com.smart.rchat.smart.network;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
@@ -22,10 +23,13 @@ import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.smart.rchat.smart.HomeActivity;
+import com.smart.rchat.smart.PhoneVerifyActivity;
 import com.smart.rchat.smart.R;
 import com.smart.rchat.smart.interfaces.IServerEndPoint;
 import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.MessageRequest;
+import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppUtil;
 import com.smart.rchat.smart.util.RchatError;
 
@@ -146,8 +150,31 @@ public class FireBaseImpl implements IServerEndPoint {
     }
 
     @Override
-    public void updatePhoneNo(String phoneNumber, ResponseListener responseListener) {
-
+    public void updatePhoneNo(final String phoneNo, User user, final ResponseListener responseListener) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("/Users");
+        ref.child(AppUtil.getUserId()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    final DatabaseReference phoneRef = FirebaseDatabase.getInstance().getReference("/Phone");
+                    phoneRef.child(phoneNo).setValue(AppUtil.getUserId()).addOnCompleteListener(
+                            new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        responseListener.onSuccess(null);
+                                    } else {
+                                        responseListener.onError(
+                                                new RchatError(getMessageFromException(task.getException())));
+                                    }
+                                }
+                            });
+                }else{
+                    responseListener.onError(
+                            new RchatError(getMessageFromException(task.getException())));
+                }
+            }
+        });
     }
 
     @Override
@@ -288,4 +315,14 @@ public class FireBaseImpl implements IServerEndPoint {
                     }
                 });
     }
+
+    private String getMessageFromException(Exception ex) {
+        String code = "something went wrong";
+        if (ex != null &&  ex instanceof FirebaseAuthException) {
+            FirebaseAuthException firebaseAuthException = (FirebaseAuthException) ex;
+            code = firebaseAuthException.getErrorCode();
+        }
+        return code;
+    }
+
 }

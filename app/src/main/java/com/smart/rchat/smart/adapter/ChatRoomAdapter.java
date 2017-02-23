@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -58,10 +59,16 @@ public class ChatRoomAdapter extends CursorAdapter {
 
     private String friendUserId;
 
+    private Typeface robotThin;
+
+    private Typeface roboBold;
+
     public ChatRoomAdapter(Context context, Cursor c, String friendUserId) {
         super(context, c, false);
         this.inflater = LayoutInflater.from(context);
         this.friendUserId = friendUserId;
+        this.robotThin = EasyFonts.robotoThin(context);
+        this.roboBold = EasyFonts.robotoBold(context);
     }
 
     @Override
@@ -111,13 +118,13 @@ public class ChatRoomAdapter extends CursorAdapter {
 
         if (!from.equals(myId)) {
             left.setText(cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message)));
-            left.setTypeface(EasyFonts.robotoThin(context));
+            left.setTypeface(robotThin);
             rightView.setVisibility(View.GONE);
             leftView.setVisibility(View.VISIBLE);
         } else {
             rightView.setVisibility(View.VISIBLE);
             leftView.setVisibility(View.GONE);
-            right.setTypeface(EasyFonts.robotoThin(context));
+            right.setTypeface(robotThin);
             right.setText(cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message)));
         }
     }
@@ -133,8 +140,8 @@ public class ChatRoomAdapter extends CursorAdapter {
             TextView name = (TextView) inContactLayout.findViewById(R.id.tvContactName);
             TextView number = (TextView) inContactLayout.findViewById(R.id.tvContactNumber);
 
-            name.setTypeface(EasyFonts.robotoBold(context));
-            number.setTypeface(EasyFonts.robotoThin(context));
+            name.setTypeface(roboBold);
+            number.setTypeface(robotThin);
 
             final String message = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
             try {
@@ -189,8 +196,6 @@ public class ChatRoomAdapter extends CursorAdapter {
             leftViewImg.setVisibility(View.VISIBLE);
             rightViewImg.setVisibility(View.GONE);
             ImageView leftImageView = (ImageView) view.findViewById(R.id.ivInImg);
-
-            //if()
 
             String url = cursor.getString(cursor.getColumnIndex(RChatContract.MESSAGE_TABLE.message));
             Glide.with(context).using(new FirebaseImageLoader())

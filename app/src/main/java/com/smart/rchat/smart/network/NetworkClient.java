@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.smart.rchat.smart.interfaces.IServerEndPoint;
 import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.MessageRequest;
+import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppData;
 
 /**
@@ -69,6 +70,10 @@ public class NetworkClient {
 
     public  void loadBitMap(Context context,String url, ImageView imageView,int type){
         serverEndPoint.loadBitMap(context,url,imageView,type);
+    }
+
+    public void updatePhoneNo(String phoneNo, User user,ResponseListener responseListener){
+         serverEndPoint.updatePhoneNo(phoneNo,user,responseListener);
     }
 
 }

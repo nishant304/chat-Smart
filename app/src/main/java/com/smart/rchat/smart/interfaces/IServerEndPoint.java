@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.smart.rchat.smart.models.MessageRequest;
+import com.smart.rchat.smart.models.User;
 
 /**
  * Created by nishant on 05.02.17.
@@ -28,7 +29,7 @@ public interface IServerEndPoint {
 
     void updateTypingStatus(String typingTo);
 
-    void updatePhoneNo(String phoneNumber,ResponseListener responseListener);
+    void updatePhoneNo(String phoneNumber, User user, ResponseListener responseListener);
 
     void createGroup(String groupName,Bitmap bitmap,String [] userIDs,ResponseListener responseListener);
 

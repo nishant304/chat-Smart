@@ -13,7 +13,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.smart.rchat.smart.adapter.GroupItemSelectAdapter;
+import com.smart.rchat.smart.dao.UserDao;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.fragments.ImageSelectFragment;
 import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppData;
@@ -34,7 +36,7 @@ import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
  * Created by nishant on 09.02.17.
  */
 
-public class GroupCreateActivity extends BaseActivity implements View.OnClickListener {
+public class GroupCreateActivity extends BaseActivity implements View.OnClickListener, ImageSelectFragment.BitMapFetchListener {
 
     @BindView(R.id.edGroupName)
     public EmojiconEditText editText;
@@ -56,6 +58,8 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
     private Bitmap imageBitmap;
 
     private  String [] userid;
+
+    private ImageSelectFragment imageSelectFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,20 +90,15 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void onSuccess(JSONObject jsonObject) {
                 try {
-                    ContentValues cv = new ContentValues();
-                    cv.put(RChatContract.USER_TABLE.USER_NAME, groupName);
-                    cv.put(RChatContract.USER_TABLE.USER_ID, jsonObject.getString("groupId"));
-                    cv.put(RChatContract.USER_TABLE.PROFILE_PIC, jsonObject.getString("url"));
-                    cv.put(RChatContract.USER_TABLE.type, 2);
-                    cv.put(RChatContract.USER_TABLE.memebers, jsonObject.getJSONArray("members").toString());
-                    getContentResolver().insert(RChatContract.USER_TABLE.CONTENT_URI, cv);
+                    UserDao.insertValues(GroupCreateActivity.this,jsonObject.getString("groupId"),groupName,
+                            jsonObject.getString("url"),jsonObject.getJSONArray("members").toString(),2);
+
                     Intent intent = new Intent(GroupCreateActivity.this, ChatRoomActivity.class);
                     intent.putExtra("friend_user_id",jsonObject.getString("groupId"));
                     intent.putExtra("name",groupName);
                     intent.putExtra("type",2);
                     intent.putExtra("members",jsonObject.getJSONArray("members").toString());
                     setResult(RESULT_OK,intent);
-                    //startActivity(intent);
                     finish();
                 }catch (Exception e){
 
@@ -115,26 +114,20 @@ public class GroupCreateActivity extends BaseActivity implements View.OnClickLis
 
     @OnClick(R.id.ivGroupImage)
     public void fetchGroupImage(View view){
-        Intent takePictureIntent = new Intent(ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE  && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            imageBitmap = (Bitmap) extras.get("data");
-            groupImage.setImageBitmap(imageBitmap);
-        }
+        imageSelectFragment = new ImageSelectFragment();
+        imageSelectFragment.show(getFragmentManager(),ImageSelectFragment.TAG);
     }
 
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
         finish();
+    }
+
+    @Override
+    public void onBitMapFetched(Bitmap bitmap) {
+        groupImage.setImageBitmap(bitmap);
+        imageBitmap = bitmap;
     }
 
 }

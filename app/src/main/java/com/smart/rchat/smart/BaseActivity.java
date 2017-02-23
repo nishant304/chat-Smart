@@ -30,7 +30,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.network.NetworkClient;
-import com.smart.rchat.smart.services.UpdateContactsService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

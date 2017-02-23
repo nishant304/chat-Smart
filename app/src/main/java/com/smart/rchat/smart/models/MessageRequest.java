@@ -21,6 +21,10 @@ public class MessageRequest {
         this.type = type;
     }
 
+    public MessageRequest(){
+
+    }
+
     public String getTo() {
         return to;
     }

@@ -10,6 +10,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.smart.rchat.smart.util.AppUtil;
 
@@ -51,6 +52,14 @@ public class ForgotPasswordActivity extends BaseActivity {
                 if(task.isSuccessful()){
                     makeToast("please check your mail");
                     finish();
+                }else{
+                    Exception ex = task.getException();
+                    String errorMessage = "Something went wrong";
+                    if(ex != null && ex instanceof FirebaseException){
+                        FirebaseException firebaseException = (FirebaseException) ex;
+                        errorMessage = firebaseException.getMessage();
+                    }
+                    makeToast(errorMessage);
                 }
             }
         });

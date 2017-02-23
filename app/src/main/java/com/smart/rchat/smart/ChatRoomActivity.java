@@ -2,7 +2,6 @@ package com.smart.rchat.smart;
 
 import android.app.LoaderManager;
 import android.content.AsyncQueryHandler;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -20,6 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.StringSignature;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -28,8 +30,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.adapter.ChatRoomAdapter;
 import com.smart.rchat.smart.adapter.GroupChatRoomAdapter;
+import com.smart.rchat.smart.dao.MessageDao;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.fragments.ImageSelectFragment;
 import com.smart.rchat.smart.interfaces.ResponseListener;
+import com.smart.rchat.smart.models.MessageRequest;
 import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.network.NetworkClient;
 import com.smart.rchat.smart.util.AppData;
@@ -56,7 +61,7 @@ import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
  */
 
 public class ChatRoomActivity extends BaseActivity implements View.OnClickListener,
-        LoaderManager.LoaderCallbacks<Cursor>, View.OnTouchListener {
+        LoaderManager.LoaderCallbacks<Cursor>, View.OnTouchListener,ImageSelectFragment.BitMapFetchListener {
 
     @BindView(R.id.toolbar3)
     public Toolbar toolbar;
@@ -78,11 +83,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     public static final int TYPE_MESSAGE = 1;
     public static final int TYPE_IMAGE = 2;
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int PICK_IMAGE = 2;
     private static final int PICK_CONTACT = 3;
 
-    int type;
+    private int type;
 
     FirebaseUser currUser = FirebaseAuth.getInstance().getCurrentUser();
     private String friendUserId;
@@ -93,6 +96,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private TextView tvLastSeen;
 
     private ArrayList<User> users = new ArrayList<>();
+
+    private ImageSelectFragment imageSelectFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +120,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             getLoaderManager().initLoader(1, null, this);
         }
         setUpToolBar();
+        imageSelectFragment = ImageSelectFragment.getInstane(getFragmentManager());
+
     }
 
     @Override
@@ -123,9 +130,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void setupListView() {
-        if(type == 1) {
+        if (type == 1) {
             chatRoomAdapter = new ChatRoomAdapter(this, null, friendUserId);
-        }else{
+        } else {
             chatRoomAdapter = new GroupChatRoomAdapter(this, null, friendUserId);
         }
         listView.setAdapter(chatRoomAdapter);
@@ -185,8 +192,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
         String message = edMessageBox.getText().toString();
         String key = getNetworkClient().sendMessage(friendUserId, message);
-        getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, AppUtil.
-                getCVforMessafRequest(friendUserId, message, 1, key));
+        MessageDao.insertValue(this, new MessageRequest(friendUserId, AppUtil.getUserId(), message, 1), key);
         edMessageBox.getText().clear();
     }
 
@@ -195,10 +201,15 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         intent.putExtra("id", friendUserId);
         intent.putExtra("type", type);
         intent.putExtra("name", name);
-        if(type == 2){
+        if (type == 2) {
             AppData.getInstance().dumpObject(users);
         }
         startActivity(intent);
+    }
+
+    @Override
+    public void onBitMapFetched(Bitmap bitmap) {
+        uploadBitMap(bitmap);
     }
 
     /***
@@ -210,10 +221,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         if (event.getAction() == MotionEvent.ACTION_UP) {
             if (event.getRawX() >= (edMessageBox.getRight() - edMessageBox.getCompoundDrawables()[2].
                     getBounds().width())) {
-                Intent takePictureIntent = new Intent(ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
+                    imageSelectFragment.getCameraImage();
                 return true;
             }
         }
@@ -249,7 +257,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         } else {
             try {
                 onGroupMemberInfoFetched(data);
-            }catch (JSONException js){
+            } catch (JSONException js) {
 
             }
         }
@@ -269,58 +277,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            final String fileUrl = "images/" + UUID.randomUUID() + ".png";
-            AppData.getInstance().getLruCache().put(fileUrl, imageBitmap);
-
-            NetworkClient.getInstance().uploadBitMap(fileUrl, new ResponseListener() {
-                @Override
-                public void onSuccess(JSONObject jsonObject) {
-                    String key = NetworkClient.getInstance().sendImageRequest(friendUserId, fileUrl);
-                    ContentValues cv = new ContentValues();
-                    cv.put(RChatContract.MESSAGE_TABLE.to, friendUserId);
-                    cv.put(RChatContract.MESSAGE_TABLE.message, fileUrl);
-                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                    cv.put(RChatContract.MESSAGE_TABLE.from, currUser.getUid());
-                    cv.put(RChatContract.MESSAGE_TABLE.type, TYPE_IMAGE);
-                    cv.put(RChatContract.MESSAGE_TABLE.msg_id, key);
-                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
-                }
-
-                @Override
-                public void onError(Exception error) {
-
-                }
-            });
-        }
-        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = AppUtil.getBitmapFromUri(data.getData(), this);
-            final String fileUrl = "images/" + UUID.randomUUID() + ".png";
-            AppData.getInstance().getLruCache().put(fileUrl, imageBitmap);
-
-            NetworkClient.getInstance().uploadBitMap(fileUrl, new ResponseListener() {
-                @Override
-                public void onSuccess(JSONObject jsonObject) {
-                    String key = NetworkClient.getInstance().sendImageRequest(friendUserId, fileUrl);
-                    ContentValues cv = new ContentValues();
-                    cv.put(RChatContract.MESSAGE_TABLE.to, friendUserId);
-                    cv.put(RChatContract.MESSAGE_TABLE.message, fileUrl);
-                    cv.put(RChatContract.MESSAGE_TABLE.time, System.currentTimeMillis());
-                    cv.put(RChatContract.MESSAGE_TABLE.from, currUser.getUid());
-                    cv.put(RChatContract.MESSAGE_TABLE.type, TYPE_IMAGE);
-                    cv.put(RChatContract.MESSAGE_TABLE.msg_id, key);
-                    getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI, cv);
-                }
-
-                @Override
-                public void onError(Exception error) {
-
-                }
-            });
-        }
 
         if (requestCode == PICK_CONTACT && resultCode == RESULT_OK) {
             Uri uri = data.getData();
@@ -358,6 +314,27 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    private void uploadBitMap(Bitmap imageBitmap){
+        final String fileUrl = "images/" + UUID.randomUUID() + ".png";
+        AppData.getInstance().getLruCache().put(fileUrl, imageBitmap);
+
+        NetworkClient.getInstance().uploadBitMap(fileUrl, new ResponseListener() {
+            @Override
+            public void onSuccess(JSONObject jsonObject) {
+                String key = NetworkClient.getInstance().sendImageRequest(friendUserId, fileUrl);
+                MessageDao.insertValue(ChatRoomActivity.this, new MessageRequest(friendUserId, AppUtil.getUserId(),
+                        fileUrl, TYPE_IMAGE), key);
+            }
+
+            @Override
+            public void onError(Exception error) {
+
+            }
+        });
+
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.chat_screen_menu, menu);
@@ -366,26 +343,15 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         if (item.getItemId() == R.id.action_send_photo) {
-            Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-            getIntent.setType("image/*");
-            getIntent.putExtra("return-data", true);
-            Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            pickIntent.setType("image/*");
-            pickIntent.putExtra("return-data", true);
-            Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
-            startActivityForResult(chooserIntent, PICK_IMAGE);
+             imageSelectFragment.getStoredImage();
             return true;
         } else if (item.getItemId() == R.id.action_send_contact) {
-
             Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
             startActivityForResult(contactPickerIntent, PICK_CONTACT);
             return true;
         }
-
         return false;
     }
 
@@ -405,45 +371,32 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private void onGroupMemberInfoFetched(Cursor cursor) throws JSONException {
         StringBuilder stringBuilder = new StringBuilder();
         cursor.moveToFirst();
-        HashMap<String,String> hm = new HashMap<>();
+        HashMap<String, String> hm = new HashMap<>();
         users = new ArrayList<>();
-        while (!cursor.isAfterLast()){
+        while (!cursor.isAfterLast()) {
             String id = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_ID));
-            String  name = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_NAME));
-            String  number = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE));
+            String name = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.USER_NAME));
+            String number = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.PHONE));
             String url = cursor.getString(cursor.getColumnIndex(RChatContract.USER_TABLE.PROFILE_PIC));
-            hm.put(id,name);
-            users.add(new User(id,url,number,name));
-            stringBuilder.append(name+ ", ");
+            hm.put(id, name);
+            users.add(new User(id, url, number, name));
+            stringBuilder.append(name + ", ");
             cursor.moveToNext();
         }
-        if(stringBuilder.length() != 0) {
+        if (stringBuilder.length() != 0) {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
-        updateToolBar(stringBuilder.toString());
+        tvLastSeen.setText(stringBuilder.toString());
 
-        for(int i=0;i<members.length();i++){
-            if(hm.get(members.get(i)) == null){
-               users.add(new User((String) members.get(i),"","",""));
+        for (int i = 0; i < members.length(); i++) {
+            if (hm.get(members.get(i)) == null) {
+                users.add(new User((String) members.get(i), "", "", ""));
             }
         }
 
-
-        //AppData.getInstance().dumpObject(users);
-
         //do we need to wait for this cursorload??
         chatRoomAdapter.setUserNameMapping(hm);
-
     }
 
-    private  void updateToolBar(String users){
-        tvLastSeen.setText(users);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AppData.getInstance().getDumpObject();// clean
-    }
 }

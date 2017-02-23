@@ -5,21 +5,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.view.View;
-import android.widget.ListView;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 
+import com.bumptech.glide.GenericRequestBuilder;
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
-import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.database.RChatContract;
 
 import org.json.JSONArray;
@@ -27,13 +21,10 @@ import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Created by nishant on 31.01.17.
@@ -41,12 +32,15 @@ import java.util.Set;
 
 public class AppUtil {
 
+    private static Pattern splChars = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+
     public static boolean isValidEmail(CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     public static String getCurrentTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
         return sdf.format(new Date());
     }
 
@@ -98,6 +92,7 @@ public class AppUtil {
         if(firebaseUser == null){
             return  null ;
         }
+
         return firebaseUser.getUid();
     }
 
@@ -115,6 +110,10 @@ public class AppUtil {
             }
         }
         return stringBuilder.toString();
+    }
+
+    public static boolean hasSplChars(String number){
+        return splChars.matcher(number).find();
     }
 
 }

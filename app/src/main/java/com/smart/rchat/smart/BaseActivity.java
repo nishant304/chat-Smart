@@ -23,12 +23,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.network.NetworkClient;
 
@@ -91,8 +93,8 @@ public class BaseActivity extends AppCompatActivity  {
         if(url == null || url.isEmpty()){
             return;
         }
-        Glide.with(this)
-                .load(url)
+        Glide.with(this).using(new FirebaseImageLoader())
+                .load(FirebaseStorage.getInstance().getReference(url))
                 .into(imageView);
     }
 

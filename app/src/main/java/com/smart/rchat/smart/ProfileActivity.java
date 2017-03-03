@@ -56,11 +56,17 @@ public class ProfileActivity extends BaseActivity  {
         if(type == 2){
             createUserList(userId);
         }
-        getNetworkClient().loadBitMap(this,userId,ivProfile,type);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(name);
         getNetworkClient().getProfileUrlFromId(userId,type,new FetchLatestProfileUrl(this));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadBitMap(profileUrl,ivProfile);
     }
 
     private  void createUserList(String groupId){
@@ -85,7 +91,11 @@ public class ProfileActivity extends BaseActivity  {
             }
             try {
                 String newurl = jsonObject.getString("url");
-                if (profileActivity.profileUrl == null || profileActivity.profileUrl.equals(newurl)) {
+                if(newurl == null || newurl.isEmpty()){
+                    return;
+                }
+
+                if (profileActivity.profileUrl != null && profileActivity.profileUrl.equals(newurl)) {
                     return;
                 }
                 profileActivity.loadBitMap(newurl, profileActivity.ivProfile);

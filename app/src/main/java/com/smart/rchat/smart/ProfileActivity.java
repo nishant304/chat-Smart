@@ -12,9 +12,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.adapter.GroupMemberAdapter;
+import com.smart.rchat.smart.dao.UserDao;
+import com.smart.rchat.smart.interfaces.ResponseListener;
 import com.smart.rchat.smart.models.User;
 import com.smart.rchat.smart.util.AppData;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -34,20 +40,27 @@ public class ProfileActivity extends BaseActivity  {
     @BindView(R.id.rvProfile)
     public RecyclerView recyclerView;
 
+    private String profileUrl;
+
+    private String userId;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
-        String id = getIntent().getStringExtra("id");
+        userId = getIntent().getStringExtra("id");
         int type =  getIntent().getIntExtra("type",0);
         String name = getIntent().getStringExtra("name");
+        profileUrl = getIntent().getStringExtra("url");
+
         if(type == 2){
-            createUserList(id);
+            createUserList(userId);
         }
-        getNetworkClient().loadBitMap(this,id,ivProfile,type);
+        getNetworkClient().loadBitMap(this,userId,ivProfile,type);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(name);
+        getNetworkClient().getProfileUrlFromId(userId,type,new FetchLatestProfileUrl(this));
     }
 
     private  void createUserList(String groupId){
@@ -55,4 +68,37 @@ public class ProfileActivity extends BaseActivity  {
         recyclerView.setAdapter(gr);
         recyclerView.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
     }
+
+    private static class FetchLatestProfileUrl implements ResponseListener{
+
+        private WeakReference<ProfileActivity> profileActivityRef ;
+
+        FetchLatestProfileUrl(ProfileActivity profileActivity){
+            profileActivityRef = new WeakReference<ProfileActivity>(profileActivity);
+        }
+
+        @Override
+        public void onSuccess(JSONObject jsonObject) {
+            ProfileActivity profileActivity = (ProfileActivity) profileActivityRef.get();
+            if(profileActivity == null){
+                return;
+            }
+            try {
+                String newurl = jsonObject.getString("url");
+                if (profileActivity.profileUrl == null || profileActivity.profileUrl.equals(newurl)) {
+                    return;
+                }
+                profileActivity.loadBitMap(newurl, profileActivity.ivProfile);
+                UserDao.updateUser(profileActivity, profileActivity.userId, newurl);
+            }catch (JSONException ex){
+
+            }
+        }
+
+        @Override
+        public void onError(Exception error) {
+
+        }
+    }
+
 }

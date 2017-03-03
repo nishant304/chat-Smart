@@ -32,6 +32,9 @@ public class HomeScreenAdapter extends ContactsAdapter {
                 cursor.getColumnIndex(RChatContract.USER_TABLE.USER_NAME));
         final String members = cursor.getString(
                 cursor.getColumnIndex(RChatContract.USER_TABLE.memebers));
+        final String url = cursor.getString(
+                cursor.getColumnIndex(RChatContract.USER_TABLE.PROFILE_PIC));
+
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,6 +43,7 @@ public class HomeScreenAdapter extends ContactsAdapter {
                 intent.putExtra("name",name);
                 intent.putExtra("type",type);
                 intent.putExtra("members",members);
+                intent.putExtra("url",url);
                 v.getContext().startActivity(intent);
             }
         });

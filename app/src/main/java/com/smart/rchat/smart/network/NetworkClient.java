@@ -76,4 +76,8 @@ public class NetworkClient {
          serverEndPoint.updatePhoneNo(phoneNo,user,responseListener);
     }
 
+    public void getProfileUrlFromId(String id, int type, final ResponseListener responseListener){
+        serverEndPoint.getProfileUrlFromId(id,type,responseListener);
+    }
+
 }

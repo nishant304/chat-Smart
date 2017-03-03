@@ -86,7 +86,19 @@ public class RChatContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
+    public int update(Uri uri, ContentValues contentValues, String where, String[] whereArgs) {
+
+        try {
+            if (uriMatcher.match(uri) == USER_TABLE) {
+                int  noOfColumnsChanged = database.getWritableDatabase().update(RChatContract.USER_TABLE.TABLE_NAME,contentValues
+                                ,where,whereArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return noOfColumnsChanged;
+            }
+        }catch (Exception e){
+
+        }
+
         return 0;
     }
 

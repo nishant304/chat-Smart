@@ -19,6 +19,7 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -81,8 +82,18 @@ public class BaseActivity extends AppCompatActivity  {
 
     @Override
     protected void onDestroy() {
-        //Glide.with(this).onDestroy();
+        //Glide.with(this).onDestroy(); //Fixme
+        //Fixme
         super.onDestroy();
+    }
+
+    protected void loadBitMap(String url, ImageView imageView){
+        if(url == null || url.isEmpty()){
+            return;
+        }
+        Glide.with(this)
+                .load(url)
+                .into(imageView);
     }
 
 }

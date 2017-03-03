@@ -99,6 +99,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     private ImageSelectFragment imageSelectFragment;
 
+    private String friendPicurl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +108,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         friendUserId = getIntent().getStringExtra("friend_user_id");
         name = getIntent().getStringExtra("name");
         type = getIntent().getIntExtra("type", 0);
-
+        friendPicurl = getIntent().getStringExtra("url");
         send.setOnClickListener(this);
         edMessageBox.setTypeface(EasyFonts.robotoMedium(this));
         View rootView = findViewById(R.id.rootView);
@@ -145,9 +147,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         TextView tvName = (TextView) toolbar.findViewById(R.id.tbName);
         tvName.setText(name);
         tvName.setOnClickListener(this);
-
         ImageView im = (ImageView) toolbar.findViewById(R.id.profile);
-        getNetworkClient().loadBitMap(this, friendUserId, im, type);
+        loadBitMap(friendPicurl,im);
 
         tvLastSeen = (TextView) toolbar.findViewById(R.id.tbLastSeen);
         tvLastSeen.setOnClickListener(this);
@@ -201,6 +202,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         intent.putExtra("id", friendUserId);
         intent.putExtra("type", type);
         intent.putExtra("name", name);
+        intent.putExtra("url", friendPicurl);
         if (type == 2) {
             AppData.getInstance().dumpObject(users);
         }

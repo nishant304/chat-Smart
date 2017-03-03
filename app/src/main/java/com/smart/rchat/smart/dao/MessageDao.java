@@ -24,4 +24,8 @@ public final class MessageDao {
         return context.getContentResolver().insert(RChatContract.MESSAGE_TABLE.CONTENT_URI,cv);
     }
 
+    public static void clearData(Context context){
+        context.getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
+    }
+
 }

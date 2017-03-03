@@ -23,7 +23,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.smart.rchat.smart.ChatRoomActivity;
 import com.smart.rchat.smart.IActivityCallBack;
@@ -56,6 +58,10 @@ public class ContactsListenerService extends Service {
     private HashMap<String, Boolean> groupId = new HashMap<>();
 
     private boolean stopTask = false;
+
+    private long lastFtechTime = 0;
+
+    boolean onChanged = false;
 
     @Override
     public void onCreate() {
@@ -117,13 +123,18 @@ public class ContactsListenerService extends Service {
                     }
                 }
 
-                if (userID != null && !userID.equals(AppUtil.getUserId())) {
+                if (userID != null /*&& !userID.equals(AppUtil.getUserId())*/) {
                     final String finalUserID = userID;
 
                     FirebaseDatabase.getInstance().getReference().child("/Users").child(userID).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            User user = new User(finalUserID,"",phoneNo,name);
+                            User user = (User) dataSnapshot.getValue(User.class);
+                            if(user == null){
+                                return;
+                            }
+                            user.setUserId(finalUserID);
+                            user.setName(name);
                             UserDao.insertValues(getApplicationContext(), user);
                             idToName.put(finalUserID, name);
                         }
@@ -168,12 +179,16 @@ public class ContactsListenerService extends Service {
             return;
         }
 
-        FirebaseDatabase.getInstance().getReference().child("Messages").orderByChild("to")
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Messages");
+
+                ref.orderByChild("to")
                 .equalTo(userId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String ss) {
 
                 MessageRequest msMessageRequest = dataSnapshot.getValue(MessageRequest.class);
+
+
                 HashMap<String,Object> hm = (HashMap<String, Object>) dataSnapshot.getValue();
                 int type = msMessageRequest.getType();
                 if (type == 4) {
@@ -207,6 +222,19 @@ public class ContactsListenerService extends Service {
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        ref.orderByChild("to")
+                .equalTo(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                onChanged = true;
             }
 
             @Override

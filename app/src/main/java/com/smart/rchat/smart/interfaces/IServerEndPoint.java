@@ -35,4 +35,6 @@ public interface IServerEndPoint {
 
     void loadBitMap(Context context,String url, ImageView imageView,int type);
 
+    String getProfileUrlFromId(String id,int type, ResponseListener responseListener);
+
 }

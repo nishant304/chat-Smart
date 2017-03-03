@@ -212,6 +212,7 @@ public class ChatRoomAdapter extends CursorAdapter {
 
             Glide.with(context).using(new FirebaseImageLoader())
                     .load(FirebaseStorage.getInstance().getReference(url))
+                    .crossFade()
                     .into(rightImageView);
 
         }

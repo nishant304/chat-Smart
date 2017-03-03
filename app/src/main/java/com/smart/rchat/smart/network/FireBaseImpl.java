@@ -49,8 +49,7 @@ public class FireBaseImpl implements IServerEndPoint {
     @Override
     public String sendMessage(MessageRequest messageRequest) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("/Messages").push();
-        ref.setValue(AppUtil.getMessageRequest(messageRequest.getTo(),
-                messageRequest.getMessage(), messageRequest.getType()));
+        ref.setValue(messageRequest);
         return ref.getKey();
     }
 
@@ -325,4 +324,43 @@ public class FireBaseImpl implements IServerEndPoint {
         return code;
     }
 
+    @Override
+    public String getProfileUrlFromId(String id, final int type, final ResponseListener responseListener) {
+        FirebaseDatabase.getInstance().getReference().child(type == 1 ? "Users" : "Group").child(id).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        dataSnapshot.getRef().removeEventListener(this);
+                        HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                        if (map == null) {
+                            return;
+                        }
+                        String url = (String) map.get(type == 1 ? "profilePic" : "url");
+
+                        if (url == null) {
+                            responseListener.onError(new RchatError("no url found"));
+                            return;
+                        }
+
+                        if (url.equals("")) {
+                            responseListener.onError(new RchatError("no url found"));
+                            return;
+                        }
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("url", url);
+                            responseListener.onSuccess(jsonObject);
+                        }catch (Exception ex){
+                            responseListener.onError(ex);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        return "";
+    }
 }

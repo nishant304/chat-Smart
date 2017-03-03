@@ -12,9 +12,13 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
 import com.smart.rchat.smart.database.RChatContract;
+import com.smart.rchat.smart.models.MessageRequest;
+import com.smart.rchat.smart.network.FireBaseImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,14 +71,6 @@ public class AppUtil {
         return null;
     }
 
-    public  static HashMap<String,Object>  getMessageRequest (String friendUserId,String message,int type){
-        HashMap<String,Object> hashMap = new HashMap<>();
-        hashMap.put("from", FirebaseAuth.getInstance().getCurrentUser().getUid());
-        hashMap.put("to",friendUserId);
-        hashMap.put("message",message);
-        hashMap.put("type", type);
-        return  hashMap;
-    }
 
     public  static ContentValues getCVforMessafRequest (String friendUserId, String message,int type,String key){
         ContentValues cv = new ContentValues();

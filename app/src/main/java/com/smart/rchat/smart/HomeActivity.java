@@ -15,6 +15,8 @@ import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
 import com.smart.rchat.smart.adapter.ContactsAdapter;
 import com.smart.rchat.smart.adapter.HomeScreenAdapter;
+import com.smart.rchat.smart.dao.MessageDao;
+import com.smart.rchat.smart.dao.UserDao;
 import com.smart.rchat.smart.database.RChatContract;
 import com.smart.rchat.smart.services.ContactsListenerService;
 import com.smart.rchat.smart.util.AppUtil;
@@ -98,15 +100,12 @@ public class HomeActivity extends ContactActivity {
 
         }
 
-        //Intent intent = new Intent(HomeActivity.this, ContactsListenerService.class);
-        //stopService(intent);
-
         FirebaseAuth.getInstance().signOut();
-        getContentResolver().delete(RChatContract.USER_TABLE.CONTENT_URI,null,null);
-        getContentResolver().delete(RChatContract.MESSAGE_TABLE.CONTENT_URI,null,null);
+        MessageDao.clearData(this);
+        UserDao.clearData(this);
 
-        Intent intent1 = new Intent(this,LoginActivity.class);
-        startActivity(intent1);
+        Intent intent = new Intent(this,LoginActivity.class);
+        startActivity(intent);
         finish();
     }
 

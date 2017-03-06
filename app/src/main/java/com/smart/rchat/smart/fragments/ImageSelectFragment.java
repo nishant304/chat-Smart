@@ -53,13 +53,19 @@ public class ImageSelectFragment extends DialogFragment implements View.OnClickL
         } else {
             throw new IllegalStateException("Please implement bitmapfetch listenetr");
         }
+
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(getArguments() != null){
+            setShowsDialog(false);
+        }
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if(getArguments() != null){
-            return  null;
-        }
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_image_select, null, false);
         view.findViewById(R.id.tvCamera).setOnClickListener(this);
         view.findViewById(R.id.tvGallery).setOnClickListener(this);
